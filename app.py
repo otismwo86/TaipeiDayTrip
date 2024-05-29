@@ -189,5 +189,3 @@ async def SearchAllmrt(request: Request):
 		raise HTTPException(status_code=500, detail=f"An error occurred while executing the query.: {e}")
 		
 
-if __name__ == '__main__':
-    uvicorn.run("app:app", reload=True)
