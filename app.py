@@ -1,6 +1,29 @@
 from fastapi import *
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
+import uvicorn
+import mysql.connector 
+from mysql.connector import errors
+from datetime import date, datetime, timedelta
+import decimal
+from typing import Optional
 app=FastAPI()
+
+def connect_to_db():
+    return mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="12345678",
+    database="attractions"
+)
+def serialize_data(data):#讓資料可以換成json
+    
+    for key, value in data.items():
+        if isinstance(value, (date, datetime)):
+            data[key] = value.isoformat()
+        elif isinstance(value, decimal.Decimal):
+            data[key] = float(value)
+    return data
+
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
@@ -15,3 +38,156 @@ async def booking(request: Request):
 @app.get("/thankyou", include_in_schema=False)
 async def thankyou(request: Request):
 	return FileResponse("./static/thankyou.html", media_type="text/html")
+
+@app.get("/api/attractions")
+async def getattractions(request: Request, page: int = Query(...,ge=0), keyword: str= Query(None)):
+	try:
+		db_connection = connect_to_db()
+	except Exception as e:
+		raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
+	try:
+		cursor = db_connection.cursor(dictionary=True)
+		item_per_page = 12
+		offset = page * item_per_page
+		#把輸入like化
+		like_keyword = f"%{keyword}%"
+		#抓出總共有多少向，用在後面的exception
+		count_query = "SELECT COUNT(*) as total FROM attractions"
+		cursor.execute(count_query)
+		total_items = cursor.fetchone()["total"]
+
+        
+		if keyword:
+			query = """
+            SELECT 
+                a.id,
+                a.name,
+                c.name AS category,
+                a.description,
+                a.address,
+                a.direction AS transport,
+                m.name AS mrt,
+                a.latitude AS lat,
+                a.longitude AS lng,
+                a.file AS images
+            FROM 
+                attractions a
+            JOIN 
+                categories c ON a.category_id = c.id
+            JOIN 
+                mrt_stations m ON a.mrt_id = m.id
+            WHERE a.name LIKE %s OR m.name LIKE %s
+            ORDER BY
+                a.id
+            LIMIT %s OFFSET %s
+            """
+			
+			cursor.execute(query, (like_keyword, like_keyword, item_per_page, offset))
+		else:
+			query = """
+            SELECT 
+                a.id,
+                a.name,
+                c.name AS category,
+                a.description,
+                a.address,
+                a.direction AS transport,
+                m.name AS mrt,
+                a.latitude AS lat,
+                a.longitude AS lng,
+                a.file AS images
+            FROM 
+                attractions a
+            JOIN 
+                categories c ON a.category_id = c.id
+            JOIN 
+                mrt_stations m ON a.mrt_id = m.id
+            ORDER BY
+                a.id
+            LIMIT %s OFFSET %s
+            """
+			cursor.execute(query, (item_per_page, offset))
+        
+		data = cursor.fetchall()
+		nextPage = page +1 if total_items > offset + item_per_page else "No next Page"
+		if data == []:
+			raise HTTPException(status_code=400, detail=f"Wrong page number")
+		return {'nextPage':f'{nextPage}','data':data}
+	except errors.Error as e:    
+		raise HTTPException(status_code=500, detail="An error occurred while executing the query.")
+	except Exception as e:
+		raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
+@app.get("/api/attractions/{attractionId}")
+async def attractionIdsearch(request: Request, attractionId: int):
+    try:
+        db_connection = connect_to_db()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
+    
+    try:
+        cursor = db_connection.cursor(dictionary=True)#這樣返回的結果會是一個字典，方便轉換為 JSON。
+        cursor.execute( """
+		SELECT 
+			a.id,
+			a.name,
+            c.name AS category,
+			a.description,
+			a.address,
+			a.direction As transport,
+            m.name AS mrt,
+            a.latitude As lat,
+			a.longitude As lng,
+			a.file As images
+			
+			
+		FROM 
+			attractions a
+		JOIN 
+			categories c ON a.category_id = c.id
+		JOIN 
+			mrt_stations m ON a.mrt_id = m.id
+		WHERE 
+			a.id = %s;
+		""", (attractionId,))
+        result = cursor.fetchone()
+        cursor.close()
+        db_connection.close()
+
+        if result is None:
+            raise HTTPException(status_code=400, detail="Wrong attraction ID")
+
+        result = serialize_data(result)  # 序列化日期和小數類型
+
+        return JSONResponse(content={"data": result})
+    except errors.Error as e:
+        
+        raise HTTPException(status_code=500, detail="An error occurred while executing the query.")
+    except Exception as e:
+        
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
+    
+
+@app.get("/api/mrts")
+async def SearchAllmrt(request: Request):
+	try:
+		db_connection = connect_to_db()
+	except Exception as e:
+		raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
+		
+	
+	try:
+		cursor = db_connection.cursor()
+		cursor.execute("Select name from(Select mrt_stations.name, Count(attractions.mrt_id) as count from mrt_stations join attractions on mrt_stations.id = attractions.mrt_id group by mrt_stations.name order by count desc) as subquery")
+		result = cursor.fetchall()
+		cursor.close()
+		db_connection.close()
+
+		mrt_names = [row[0] for row in result]
+
+		return JSONResponse(content={"data": mrt_names})
+	except Exception as e:
+		raise HTTPException(status_code=500, detail=f"An error occurred while executing the query.: {e}")
+		
+
+if __name__ == '__main__':
+    uvicorn.run("app:app", reload=True)
