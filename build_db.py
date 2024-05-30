@@ -88,7 +88,8 @@ for entry in data['result']['results']:
     files = entry.get('file', '')
     file_urls = files.split('https://')
     file_urls = ['https://' + url for url in file_urls if url.lower().endswith(('.jpg', '.png'))]
-    filtered_files = json.dumps(file_urls)  # 將過濾後的URL轉換為JSON數組
+    filtered_files = file_urls if file_urls else []  # 將過濾後的URL轉換為JSON數組
+
     mrt_id = mrt_map.get(entry['MRT'], None)
     category_id = category_map.get(entry['CAT'], None)
 
@@ -100,7 +101,7 @@ for entry in data['result']['results']:
     values = (
         entry['name'], entry['description'], entry['address'], entry['rate'], entry['date'],
         float(entry['longitude']), float(entry['latitude']), category_id, entry['MEMO_TIME'], entry['POI'],
-        filtered_files, entry['avBegin'], entry['avEnd'], mrt_id, entry['REF_WP'], entry['langinfo'],
+        json.dumps(filtered_files), entry['avBegin'], entry['avEnd'], mrt_id, entry['REF_WP'], entry['langinfo'],
         entry['SERIAL_NO'], entry['idpt'], entry['direction']
     )
     cursor.execute(sql, values)

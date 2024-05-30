@@ -6,6 +6,7 @@ from mysql.connector import errors
 from datetime import date, datetime, timedelta
 import decimal
 from typing import Optional
+import json
 app=FastAPI()
 
 def connect_to_db():
@@ -40,25 +41,31 @@ async def thankyou(request: Request):
 	return FileResponse("./static/thankyou.html", media_type="text/html")
 
 @app.get("/api/attractions")
-async def getattractions(request: Request, page: int = Query(...,ge=0), keyword: str= Query(None)):
-	try:
-		db_connection = connect_to_db()
-	except Exception as e:
-		raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
-	try:
-		cursor = db_connection.cursor(dictionary=True)
-		item_per_page = 12
-		offset = page * item_per_page
-		#把輸入like化
-		like_keyword = f"%{keyword}%"
-		#抓出總共有多少向，用在後面的exception
-		count_query = "SELECT COUNT(*) as total FROM attractions"
-		cursor.execute(count_query)
-		total_items = cursor.fetchone()["total"]
-
-        
-		if keyword:
-			query = """
+async def getattractions(request: Request, page: int = Query(..., ge=0), keyword: str = Query(None)):
+    try:
+        db_connection = connect_to_db()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
+    
+    try:
+        cursor = db_connection.cursor(dictionary=True)
+        item_per_page = 12
+        offset = page * item_per_page
+        like_keyword = f"%{keyword}%" if keyword else None
+        #抓出總共有多少向，用在後面的exception
+        count_query = "SELECT COUNT(*) as total FROM attractions"
+        cursor.execute(count_query)
+        total_items = cursor.fetchone()["total"]
+        count_query_keyword = """
+            SELECT COUNT(*) as total
+            FROM attractions a 
+            JOIN categories c ON a.category_id = c.id 
+            JOIN mrt_stations m ON a.mrt_id = m.id 
+            WHERE a.name LIKE %s OR m.name LIKE %s"""
+        cursor.execute(count_query_keyword, (like_keyword,like_keyword))
+        total_items_keyword = cursor.fetchone()["total"]
+        if keyword:
+            query = """
             SELECT 
                 a.id,
                 a.name,
@@ -81,10 +88,9 @@ async def getattractions(request: Request, page: int = Query(...,ge=0), keyword:
                 a.id
             LIMIT %s OFFSET %s
             """
-			
-			cursor.execute(query, (like_keyword, like_keyword, item_per_page, offset))
-		else:
-			query = """
+            cursor.execute(query, (like_keyword, like_keyword, item_per_page, offset))
+        else:
+            query = """
             SELECT 
                 a.id,
                 a.name,
@@ -106,17 +112,30 @@ async def getattractions(request: Request, page: int = Query(...,ge=0), keyword:
                 a.id
             LIMIT %s OFFSET %s
             """
-			cursor.execute(query, (item_per_page, offset))
+            cursor.execute(query, (item_per_page, offset))
         
-		data = cursor.fetchall()
-		nextPage = page +1 if total_items > offset + item_per_page else "No next Page"
-		if data == []:
-			raise HTTPException(status_code=400, detail=f"Wrong page number")
-		return {'nextPage':f'{nextPage}','data':data}
-	except errors.Error as e:    
-		raise HTTPException(status_code=500, detail="An error occurred while executing the query.")
-	except Exception as e:
-		raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
+        data = cursor.fetchall()
+        if not keyword:
+            nextPage = page + 1 if total_items > offset + item_per_page else None
+        else:
+            nextPage = page +1 if total_items_keyword > offset + item_per_page else None
+        if not data:
+            raise HTTPException(status_code=400, detail="Wrong page number")
+        
+        # 確保 images 欄位是 JSON 格式
+        for item in data:
+            if item.get('images'):
+                    item['images'] = json.loads(item['images'])
+                
+        
+        return {'nextPage': nextPage, 'data': data}
+    except errors.Error as e:
+        raise HTTPException(status_code=500, detail="An error occurred while executing the query.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
+    finally:
+        cursor.close()
+        db_connection.close()
 @app.get("/api/attractions/{attractionId}")
 async def attractionIdsearch(request: Request, attractionId: int):
     try:
@@ -155,6 +174,8 @@ async def attractionIdsearch(request: Request, attractionId: int):
 
         if result is None:
             raise HTTPException(status_code=400, detail="Wrong attraction ID")
+        if result.get('images'):       
+            result['images'] = json.loads(result['images'])
 
         result = serialize_data(result)  # 序列化日期和小數類型
 
@@ -187,5 +208,7 @@ async def SearchAllmrt(request: Request):
 		return JSONResponse(content={"data": mrt_names})
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"An error occurred while executing the query.: {e}")
-		
+
+if __name__ == '__main__':
+    uvicorn.run("app:app", reload=True)
 
