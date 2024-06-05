@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 
 
 app=FastAPI()
-app.mount("/taipei-day-trip", StaticFiles(directory="html"), name="static")
+app.mount("/week1secondface", StaticFiles(directory="html"), name="static")
 templates = Jinja2Templates(directory="html")
 
 
