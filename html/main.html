@@ -190,16 +190,32 @@
                 });
             }
                 
+            document.addEventListener("DOMContentLoaded", () => {
             let footerObserverOptions = {
                 root: null,
                 rootMargin: '0px',
-                threshold: 1
+                threshold: 0
             };
-            
+
+            let canFetch = true; //用來控制是否可以再次觸發
+
             function footerCallback(entries, observer) {
                 entries.forEach(entry => {
-                    if (entry.isIntersecting && nextpage !== null && nextpage !== 0) {
+                    if (entry.isIntersecting && nextpage !== null && nextpage !== 0 && canFetch) {
+                        canFetch = false; //暫時禁用觸發
                         fetchandcreate(nextpage);
+                        setTimeout(() => {
+                            canFetch = true;
+
+                            // 檢查footer是否仍在視窗內
+                            if (entry.isIntersecting) {
+                                fetchandcreate(nextpage);
+                                canFetch = false; //再次暫時禁用觸發
+                                setTimeout(() => {
+                                    canFetch = true;
+                                }, 1000);
+                            }
+                        }, 1000);
                     }
                 });
             }
@@ -207,6 +223,7 @@
             let footerObserver = new IntersectionObserver(footerCallback, footerObserverOptions);
             let footerTarget = document.querySelector('.footer');
             footerObserver.observe(footerTarget);
+        });
         </script>
             
 
