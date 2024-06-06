@@ -194,7 +194,7 @@
             let footerObserverOptions = {
                 root: null,
                 rootMargin: '0px',
-                threshold: 0
+                threshold: 1
             };
 
             let canFetch = true; //用來控制是否可以再次觸發
@@ -205,17 +205,8 @@
                         canFetch = false; //暫時禁用觸發
                         fetchandcreate(nextpage);
                         setTimeout(() => {
-                            canFetch = true;
-
-                            // 檢查footer是否仍在視窗內
-                            if (entry.isIntersecting) {
-                                fetchandcreate(nextpage);
-                                canFetch = false; //再次暫時禁用觸發
-                                setTimeout(() => {
-                                    canFetch = true;
-                                }, 1000);
-                            }
-                        }, 1000);
+                            canFetch = true; //0.5秒後重新允許觸發
+                        },500);
                     }
                 });
             }
