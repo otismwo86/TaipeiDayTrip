@@ -74,9 +74,8 @@ body {
     align-items: center;
     justify-content: space-between;
     margin: 0 auto;
-    margin-top: 54px;
+    margin-top: 40px;
     padding: 0px;
-    padding-bottom: 20px;
     border-bottom: 1px solid #E8E8E8;
 }
 
@@ -273,6 +272,7 @@ label {
     flex-direction: column; 
     gap: 20px;
     padding: 20px;
+    margin-top: 10px;
 }
 
 .description {
@@ -313,11 +313,17 @@ label {
 }
 
 @media(max-width:1250px){
+    .navbar {
+        border-bottom: none;
+    }
     .container{
         width: 900px;
     }
     .main-container{
         width: 900px;
+        margin-top: 0px;
+        grid-row-gap: 0px;
+        padding: 0px;
     }
     .slideshow-container{
         width: 400px;
@@ -410,11 +416,15 @@ label {
         flex-direction: column; 
         gap: 20px;
         padding: 10px;
+        margin-top: 20px;
     }
     
 }
 
 @media(max-width:950px){
+    .navbar {
+        border-bottom: none;
+    }
     .container{
         width: 550px;
     }
@@ -422,6 +432,7 @@ label {
         grid-template-columns: 1fr;
         grid-row-gap: 20px;
         width: 550px;
+        grid-column-gap: 0px;
     }
     .slideshow-container{
         width: 550px;
@@ -514,10 +525,14 @@ label {
         margin: 0 auto;
         flex-direction: column; 
         padding: 10px;
+        margin-top: 20px;
     }
 }
 
 @media(max-width:600px){
+    .navbar {
+        border-bottom: none;
+    }
     .container{
         width: 100%;
     }
@@ -530,8 +545,10 @@ label {
     }
     .main-container{
         grid-template-columns: 1fr;
-        grid-row-gap: 20px;
+        grid-row-gap: 0px;
+        margin-top: 0px;
         width: 100%;
+        padding-bottom: 0px;
     }
     .slideshow-container{
         width: 100%;
@@ -545,6 +562,8 @@ label {
         width: 90%;
         height: 390px;
         margin: 0 auto;
+        margin-top: 10px;
+        padding-bottom: 0px;
     }
     .location{
         font-size: 24px;
@@ -624,5 +643,10 @@ label {
         width: 90%;
         flex-direction: column; 
         padding: 0px;
+        margin-top: 30px;
+        gap: 0px;
+    }
+    .section-title{
+        margin-top: 10px;
     }
 }
