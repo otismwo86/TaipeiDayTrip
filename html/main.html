@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta charset="utf-8"/>
+        <title>台北一日遊</title>
+        <link rel="stylesheet" type="text/css" href="week1secondface/main.css"/>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="container">
+                <a href="#" class="logo">台北一日遊</a>
+                <ul class="nav-links">
+                    <li><a href="#">預訂行程</a></li>
+                    <li><a href="#">登入/註冊</a></li>
+                </ul>
+            </div>
+        </nav>
+        
+        
+        <div class="welcome-section">
+            <div class="welcome-container">
+                <div class="welcome-content">
+                    <h1>輕鬆享受台北一日悠閒</h1>
+                    <p>探索每個角落，體驗城市的深度旅遊行程</p>
+                    <div class="search-bar">
+                        <input type="text" id="SearchAttraction" placeholder="輸入景點名稱查詢">
+                        <button class="image-button" onclick="searchAttractions()">
+                            <img src="/week1secondface/picture/searchbar.png" alt="搜尋">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="carousel">
+            <button class="carousel-button left" onclick="scrolltoLeft()"></button>
+            <div class="carousel-container" id="carouselContainer">
+                <!-- 生成的內容將放在這裡 -->
+            </div>
+            <button class="carousel-button right" onclick="scrolltoRight()"></button>
+        </div>
+
+        <div class="attractions" id="attractions-container">
+            
+        </div>
+
+
+        
+        <footer class="footer">
+            <div class="footer-content">COPYRIGHT © 2021 台北一日遊<div>
+        </footer>
+        <script>
+            let mrturl = "http://18.209.3.48:8000/api/mrts";
+        fetch(mrturl)
+            .then(response => response.json())
+            .then(data => {
+                let mrtstations = data.data;
+                let carouselContainer = document.getElementById("carouselContainer");
+                mrtstations.forEach(station => {
+                    let item = document.createElement("a");
+                    item.href = "#";
+                    item.textContent = station;
+                    item.addEventListener('click', function() {
+                        document.getElementById("SearchAttraction").value = station;
+                        searchAttractions();
+                    });
+                    carouselContainer.appendChild(item);
+                });
+            });
+
+
+
+            let nextpage = 0;
+            let currentSearchValue = "";
+            let baseUrl = "http://18.209.3.48:8000/api/attractions";
+
+            function fetchandcreate(n){
+                let apiURL = `${baseUrl}?page=${n}`;
+                if (currentSearchValue) {
+                    apiURL += `&keyword=${currentSearchValue}`;
+                }
+                fetch(apiURL)
+                    .then(response => response.json())
+                    .then(data => {
+                        let attractions = data.data;
+                        let container = document.getElementById("attractions-container");
+
+                        attractions.forEach(attraction => {
+                            let cardWrapper = document.createElement("div");
+                            cardWrapper.className = "card";
+
+                            let card = document.createElement("div");
+                            card.className = "main-item";
+                            card.style.backgroundImage = `url(${attraction.images[0]})`;
+
+                            let name = document.createElement("div");
+                            name.className = "attraction-name";
+                            name.textContent = attraction.name;
+
+                            let infoContainer = document.createElement("div");
+                            infoContainer.className = "info-container";
+
+                            let category = document.createElement("div");
+                            category.className = "attraction-category";
+                            category.textContent = attraction.category;
+
+                            let mrt = document.createElement("div");
+                            mrt.className = "attraction-mrt";
+                            mrt.textContent = attraction.mrt;
+
+                            infoContainer.appendChild(mrt);
+                            infoContainer.appendChild(category);
+
+                            card.appendChild(name);
+                            cardWrapper.appendChild(card);
+                            cardWrapper.appendChild(infoContainer);
+                            container.appendChild(cardWrapper);
+                            nextpage = data.nextPage;
+                        });
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            }
+            
+            fetchandcreate(nextpage);
+
+            let page = 0;
+            function searchAttractions(){
+                let searchInput = document.getElementById("SearchAttraction").value;
+                let searchValue = searchInput.trim();
+                if (!searchValue) {
+                    return;
+                }
+                currentSearchValue = searchValue;
+                let searchurl = `${baseUrl}?page=${page}&keyword=${currentSearchValue}`;
+                fetch(searchurl)
+                .then(response => response.json())
+                .then(data => {
+                    let attractions = data.data;
+                    let container = document.getElementById("attractions-container");
+                    container.innerHTML = "";
+
+                    attractions.forEach(attraction => {
+                        let cardWrapper = document.createElement("div");
+                        cardWrapper.className = "card";
+
+                        let card = document.createElement("div");
+                        card.className = "main-item";
+                        card.style.backgroundImage = `url(${attraction.images[0]})`;
+
+                        let name = document.createElement("div");
+                        name.className = "attraction-name";
+                        name.textContent = attraction.name;
+
+                        let infoContainer = document.createElement("div");
+                        infoContainer.className = "info-container";
+
+                        let category = document.createElement("div");
+                        category.className = "attraction-category";
+                        category.textContent = attraction.category;
+
+                        let mrt = document.createElement("div");
+                        mrt.className = "attraction-mrt";
+                        mrt.textContent = attraction.mrt;
+
+                        infoContainer.appendChild(mrt);
+                        infoContainer.appendChild(category);
+
+                        card.appendChild(name);
+                        cardWrapper.appendChild(card);
+                        cardWrapper.appendChild(infoContainer);
+                        container.appendChild(cardWrapper);
+                        nextpage = data.nextPage;
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+            }
+            function scrolltoLeft() {
+            document.getElementById('carouselContainer').scrollBy({
+                    left: -1000,
+                    behavior: 'smooth'
+                });
+            }
+
+            function scrolltoRight() {
+                document.getElementById('carouselContainer').scrollBy({
+                    left: 1000,
+                    behavior: 'smooth'
+                });
+            }
+                
+            document.addEventListener("DOMContentLoaded", () => {
+            let footerObserverOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 1
+            };
+
+            let canFetch = true; //用來控制是否可以再次觸發
+
+            function footerCallback(entries, observer) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && nextpage !== null && nextpage !== 0 && canFetch) {
+                        canFetch = false; //暫時禁用觸發
+                        fetchandcreate(nextpage);
+                        setTimeout(() => {
+                            canFetch = true; //0.5秒後重新允許觸發
+                        },500);
+                    }
+                });
+            }
+
+            let footerObserver = new IntersectionObserver(footerCallback, footerObserverOptions);
+            let footerTarget = document.querySelector('.footer');
+            footerObserver.observe(footerTarget);
+        });
+        </script>
+            
+
+    </body>
+
+</html>

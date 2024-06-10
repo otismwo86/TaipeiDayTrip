@@ -1,5 +1,5 @@
 from fastapi import *
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse,HTMLResponse
 import uvicorn
 import mysql.connector 
 from mysql.connector import errors
@@ -7,7 +7,14 @@ from datetime import date, datetime, timedelta
 import decimal
 from typing import Optional
 import json
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+
 app=FastAPI()
+app.mount("/week1secondface", StaticFiles(directory="html"), name="static")
+templates = Jinja2Templates(directory="html")
+
 
 def connect_to_db():
     return mysql.connector.connect(
@@ -25,6 +32,9 @@ def serialize_data(data):#讓資料可以換成json
             data[key] = float(value)
     return data
 
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("main.html", {"request": request})
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
@@ -39,6 +49,12 @@ async def booking(request: Request):
 @app.get("/thankyou", include_in_schema=False)
 async def thankyou(request: Request):
 	return FileResponse("./static/thankyou.html", media_type="text/html")
+
+
+
+@app.get("/home", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("main.html", {"request": request})
 
 @app.get("/api/attractions")
 async def getattractions(request: Request, page: int = Query(..., ge=0), keyword: str = Query(None)):
@@ -208,5 +224,6 @@ async def SearchAllmrt(request: Request):
 		return JSONResponse(content={"data": mrt_names})
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"An error occurred while executing the query.: {e}")
+
 
 
