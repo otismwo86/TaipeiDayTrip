@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta charset="utf-8"/>
+        <title>台北一日遊</title>
+        <link rel="stylesheet" type="text/css" href="../week1secondface/attractionpage.css"/>
+        <link href="../week1secondface/picture/icon.ico" rel="shortcut icon"/>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    </head>
+    <body>
+    <div class="wrapper">
+        <nav class="navbar">
+            <div class="container">
+                <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
+                <ul class="nav-links">
+                    <li><a href="#">預訂行程</a></li>
+                    <li><a href="#">登入/註冊</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="main-container">
+            <div class="slideshow-container">
+                <div class="slideshow-inner" id="slideshowInner">
+                    <!-- 動態生成的圖片將被插入到這裡 -->
+                </div>
+                <a class="left" onclick="changeSlide(-1)"></a>
+                <a class="right" onclick="changeSlide(1)"></a>
+                <div class="dot-container" id="dotContainer">
+                    <!-- 動態生成的導航點將被插入到這裡 -->
+                </div>
+            </div>
+            <div class="description-container">
+                <div class="location"></div>
+                <div class="type-mrt"></div>
+                <div class="booking-card">
+                    <div class="booking-title">訂購導覽行程</div>
+                    <div class="booking-description">以此景點為中心的一日行程，帶您探索城市角落故事</div>
+                    <div class="booking-date-label">選擇日期 : <input type="date" id="dateInput"></div>
+                    <div class="booking-time-label">選擇時間 :  
+                        <input type="radio" id="morning" name="time" value="morning">
+                        <label for="morning">上半天</label>
+                        <input type="radio" id="afternoon" name="time" value="afternoon">
+                        <label for="afternoon">下半天</label>
+                    </div>
+                    <div class="booking-price">導覽費用 : <span id="price"></span></div>
+                    <button class="booking-button">開始預約行程</button>
+                </div>
+            </div>
+            <hr>
+        </div>
+        <div class="description-style">
+            <div class="description"></div>
+            <div class="section-title">
+                景點地址:
+            </div>
+            <div class="address"></div>
+            <div class="section-title">
+                交通方式:
+            </div>
+            <div class="transportation"></div>
+            
+        </div>
+        
+
+        <footer class="footer">
+            <div class="footer-content">COPYRIGHT © 2021 台北一日遊<div>
+        </footer>
+    </div>
+        <script>
+            let totalSlides = 0;
+            let numbers = 0;
+            document.addEventListener('DOMContentLoaded', () => {
+                const url = window.location.href;
+                const id = url.split('/').pop();
+
+                const apiUrl = `http://18.209.3.48:8000/api/attractions/${id}`;
+
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data.data)
+                        let images = data.data.images;
+                        let slideshowInner = document.getElementById('slideshowInner');
+                        let dotContainer = document.getElementById('dotContainer');
+
+                        // 清空現有的內容
+                        slideshowInner.innerHTML = '';
+                        dotContainer.innerHTML = '';
+
+                        // 生成新的幻燈片和導航點
+                        images.forEach((image, index) => {
+                            let slideDiv = document.createElement('div');
+                            slideDiv.className = 'slides';
+                            let imgElement = document.createElement('img');
+                            imgElement.src = image;
+                            imgElement.alt = `Image ${index + 1}`;
+                            slideDiv.appendChild(imgElement);
+                            slideshowInner.appendChild(slideDiv);
+
+                            let dotSpan = document.createElement('span');
+                            dotSpan.className = 'dot';
+                            if (index == 0) {
+                                dotSpan.className += ' active';
+                            }
+                            dotSpan.onclick = () => currentSlide(index);
+                            dotContainer.appendChild(dotSpan);
+                        });
+
+                        
+
+                        totalSlides = images.length;
+                        numbers = totalSlides;
+                        
+                        // 初始化幻燈片
+                        updateSlides();
+                        autoPlay();
+                        let locationDiv = document.querySelector('.location')
+                        locationDiv.textContent = data.data.name;
+                        let placenameDiv = document.querySelector('.type-mrt')
+                        placenameDiv.textContent = data.data.mrt + ' at ' + data.data.category
+                        let descriptionDiv = document.querySelector('.description');
+                        descriptionDiv.textContent = data.data.description;
+                        let addressnDiv = document.querySelector('.address');
+                        addressnDiv.textContent = data.data.address;
+                        let transportDiv = document.querySelector('.transportation');
+                        transportDiv.textContent = data.data.transport;
+
+                    })
+                    .catch(error => {
+                        console.error('There has been a problem with your fetch operation:', error);
+                    });
+            });
+
+            let slideIndex = numbers - 1;
+            let autoPlayTimeout;
+
+            let slides = document.getElementsByClassName('slides');
+            let dots = document.getElementsByClassName('dot');
+
+            function updateSlides() {
+                let slideshowInner = document.getElementById('slideshowInner');
+                slideshowInner.style.transform = `translateX(${-slideIndex * 100}%)`; //位移關鍵
+                for (let i = 0; i < dots.length; i++) {
+                    dots[i].className = dots[i].className.replace(" active", "");
+                }
+                if (dots[slideIndex]) {
+                    dots[slideIndex].className += " active";
+                }
+            }
+
+            function changeSlide(n) {
+                slideIndex = (slideIndex + n + totalSlides) % totalSlides;
+                updateSlides();
+                resetAutoPlay();
+            }
+
+            function currentSlide(n) {
+                slideIndex = n;
+                updateSlides();
+                resetAutoPlay();
+            }
+
+            function autoPlay() {
+                slideIndex = (slideIndex + 1) % totalSlides;
+                updateSlides();
+                autoPlayTimeout = setTimeout(autoPlay, 3500);
+            }
+
+            function resetAutoPlay() {
+                clearTimeout(autoPlayTimeout);
+                autoPlayTimeout = setTimeout(autoPlay, 10000);
+            }
+            let today = new Date().toISOString().split('T')[0];
+            
+            document.getElementById('dateInput').value = today;
+            document.getElementById('dateInput').min = today;
+            document.getElementById('morning').addEventListener('change', function() {
+                if (this.checked){
+                    document.getElementById('price').textContent = '新台幣 2000元';
+                }
+            })
+            document.getElementById('afternoon').addEventListener('change', function() {
+                if (this.checked){
+                    document.getElementById('price').textContent = '新台幣 2500元';
+                }
+            })
+        </script>
+
+    </body>
+</html>

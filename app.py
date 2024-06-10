@@ -36,6 +36,10 @@ def serialize_data(data):#讓資料可以換成json
 async def home(request: Request):
     return templates.TemplateResponse("main.html", {"request": request})
 
+@app.get("/attraction/{attractionId}", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("attractionpage.html", {"request": request})
+
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
 async def index(request: Request):
@@ -50,11 +54,6 @@ async def booking(request: Request):
 async def thankyou(request: Request):
 	return FileResponse("./static/thankyou.html", media_type="text/html")
 
-
-
-@app.get("/home", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("main.html", {"request": request})
 
 @app.get("/api/attractions")
 async def getattractions(request: Request, page: int = Query(..., ge=0), keyword: str = Query(None)):
