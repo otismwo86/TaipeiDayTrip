@@ -11,7 +11,7 @@
     <body>
         <nav class="navbar">
             <div class="container">
-                <a href="#" class="logo">台北一日遊</a>
+                <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
                 <ul class="nav-links">
                     <li><a href="#">預訂行程</a></li>
                     <li><a href="#">登入/註冊</a></li>
@@ -159,6 +159,11 @@
                         name.className = "attraction-name";
                         name.textContent = attraction.name;
 
+                        let id = attraction.id;
+                        cardWrapper.addEventListener('click', () => {
+                        window.location.href = `http://18.209.3.48:8000/attraction/${id}`;
+                        });
+                        
                         let infoContainer = document.createElement("div");
                         infoContainer.className = "info-container";
 

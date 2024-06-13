@@ -285,6 +285,10 @@ label {
     line-height: 1.6;
     font-size:16px;
     color:#666666;
+    text-decoration:none;
+}
+.address:hover{
+    color:black;
 }
 .section-title{
     font-weight: 700;

@@ -121,8 +121,15 @@
                         placenameDiv.textContent = data.data.mrt + ' at ' + data.data.category
                         let descriptionDiv = document.querySelector('.description');
                         descriptionDiv.textContent = data.data.description;
-                        let addressnDiv = document.querySelector('.address');
-                        addressnDiv.textContent = data.data.address;
+
+                        let latitude = data.data.lat;
+                        let longitude = data.data.lng;
+                        let addressURL = "https://www.google.com.tw/maps/search/?api=1&query=" + latitude + "," + longitude;
+
+                        let addressLink = document.querySelector('.address');
+                        addressLink.href = addressURL;
+                        addressLink.textContent = data.data.address;
+                        
                         let transportDiv = document.querySelector('.transportation');
                         transportDiv.textContent = data.data.transport;
 
