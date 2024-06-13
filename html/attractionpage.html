@@ -54,7 +54,7 @@
             <div class="section-title">
                 景點地址:
             </div>
-            <div class="address"></div>
+            <a href="#" class="address" target="_blank"></a>
             <div class="section-title">
                 交通方式:
             </div>
@@ -129,7 +129,7 @@
                         let addressLink = document.querySelector('.address');
                         addressLink.href = addressURL;
                         addressLink.textContent = data.data.address;
-                        
+
                         let transportDiv = document.querySelector('.transportation');
                         transportDiv.textContent = data.data.transport;
 
