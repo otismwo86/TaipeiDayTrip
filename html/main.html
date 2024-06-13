@@ -5,6 +5,7 @@
         <meta charset="utf-8"/>
         <title>台北一日遊</title>
         <link rel="stylesheet" type="text/css" href="week1secondface/main.css"/>
+        <link href="week1secondface/picture/icon.ico" rel="shortcut icon"/>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     </head>
     <body>
@@ -94,6 +95,11 @@
                             let card = document.createElement("div");
                             card.className = "main-item";
                             card.style.backgroundImage = `url(${attraction.images[0]})`;
+
+                            let id = attraction.id;
+                            cardWrapper.addEventListener('click', () => {
+                                window.location.href = `http://18.209.3.48:8000/attraction/${id}`;
+                            });
 
                             let name = document.createElement("div");
                             name.className = "attraction-name";
