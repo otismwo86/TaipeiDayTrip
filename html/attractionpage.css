@@ -156,6 +156,7 @@ body {
 }
 .loginbutton:hover{
     cursor: pointer;
+    background-color: #336677;
 }
 .logintoregister:hover{
     cursor:pointer;
