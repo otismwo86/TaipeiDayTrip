@@ -15,10 +15,41 @@
                 <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
                 <ul class="nav-links">
                     <li><a href="#">預訂行程</a></li>
-                    <li><a href="#">登入/註冊</a></li>
+                    <li><a href="#" id="login">登入/註冊</a></li>
                 </ul>
             </div>
         </nav>
+        <div class="loginpopup" id="loginpopup">
+            <div class="loginheaderline"></div>
+            <div class="loginpopup-content">
+                <span id="loginclose-btn" class="loginclose-btn"><img src="/taipei-day-trip/picture/dialog.png"></span>
+                <div class="loginheader">登入會員帳號</div>
+                <form id="loginForm">
+                    <input type="email" class="loginemail" id="loginemail" placeholder="輸入電子信箱" required>
+                    <input type="password" class="loginpassword" placeholder="輸入密碼" required>
+                    <div class="button-container">
+                        <button type="submit" class="loginbutton">登入帳戶</button>
+                    </div>
+                </form>
+                <div class="loginfooter">還沒有帳戶?<span class="logintoregister" id="logintoregister">點此註冊</span></div>
+            </div>
+        </div>
+        <div class="registerpopup" id="registerpopup">
+            <div class="registerheaderline"></div>
+            <div class="registerpopup-content">
+                <span id="registerclose-btn" class="registerclose-btn"><img src="/taipei-day-trip/picture/dialog.png"></span>
+                <div class="registerheader">註冊會員帳號</div>
+                <form id="registerform">
+                    <input type="text" class="registername" placeholder="輸入姓名" required>
+                    <input type="email" class="registeremail" placeholder="輸入電子信箱" required>
+                    <input type="password" class="registerpassword" placeholder="輸入密碼" required>
+                    <div class="button-container"><button class="loginbutton">註冊新帳戶</button></div>
+                </form>
+                <div class="registerfooter">已經有帳戶了?<span class="registertologin" id="registertologin">點此登入</span></div>
+            </div>
+        </div>
+        <div id="overlay" class="overlay"></div>
+
         <div class="main-container">
             <div class="slideshow-container">
                 <div class="slideshow-inner" id="slideshowInner">
@@ -68,6 +99,33 @@
         </footer>
     </div>
         <script>
+                        document.getElementById("login").addEventListener("click", function(){
+                document.getElementById('loginpopup').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+            })
+            document.getElementById('overlay').addEventListener('click', function(){
+                document.getElementById('loginpopup').style.display = 'none';
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('registerpopup').style.display = 'none';
+            })
+            document.getElementById('loginclose-btn').addEventListener('click', function(){
+                document.getElementById('loginpopup').style.display = 'none';
+                document.getElementById('overlay').style.display = 'none';
+            })
+            document.getElementById("logintoregister").addEventListener("click", function(){
+                document.getElementById('loginpopup').style.display = 'none';
+                document.getElementById('registerpopup').style.display = 'block';
+            })
+            document.getElementById("registertologin").addEventListener("click", function(){
+                document.getElementById('loginpopup').style.display = 'block';
+                document.getElementById('registerpopup').style.display = 'none';
+            })
+            document.getElementById('registerclose-btn').addEventListener('click', function(){
+                document.getElementById('registerpopup').style.display = 'none';
+                document.getElementById('overlay').style.display = 'none';
+            })
+
+
             let totalSlides = 0;
             let numbers = 0;
             document.addEventListener('DOMContentLoaded', () => {
