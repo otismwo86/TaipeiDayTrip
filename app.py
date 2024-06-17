@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 import uvicorn
 import mysql.connector 
 from mysql.connector import errors
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta,timezone
 import decimal
 from typing import Optional
 import json
@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 import jwt
-import datetime
+import datetime as dt
 
 
 
@@ -29,7 +29,7 @@ templates = Jinja2Templates(directory="html")
 
 def create_jwt_token(user_id: int, name: str, email: str):
     to_encode = {"sub": user_id, "name": name, "email": email}
-    expire = datetime.utcnow() + timedelta(days=7)
+    expire = datetime.now(timezone.utc) + timedelta(days=7)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
     return encoded_jwt
@@ -70,7 +70,7 @@ def serialize_data(data):
     for key, value in data.items():
         if isinstance(value, decimal.Decimal):
             data[key] = float(value)
-        elif isinstance(value, (datetime.date, datetime.datetime)):
+        elif isinstance(value, (dt.date, dt.datetime)):
             data[key] = value.isoformat()
     return data
 

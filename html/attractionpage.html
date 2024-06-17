@@ -188,13 +188,13 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ loginemail, loginpassword })
+                        body: JSON.stringify({ email: loginemail, password: loginpassword })
                     });
                     if (response.ok) {
                             const data = await response.json();
-                            if (data.redirect) {
+                            localStorage.setItem('token', data.token);
                             window.location.reload();  // 刷新頁面
-                        }
+                        
                         } else {
                             const errorData = await response.json();
                             loginmessageContainer.textContent = "帳號或密碼錯誤";
