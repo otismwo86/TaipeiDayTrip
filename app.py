@@ -1,5 +1,6 @@
 from fastapi import *
-from fastapi.responses import FileResponse, JSONResponse,HTMLResponse
+from fastapi.responses import FileResponse, JSONResponse,HTMLResponse,RedirectResponse
+from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 import uvicorn
 import mysql.connector 
 from mysql.connector import errors
@@ -9,13 +10,44 @@ from typing import Optional
 import json
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
+import jwt
+import datetime
+
 
 
 app=FastAPI()
+
 app.mount("/week1secondface", StaticFiles(directory="html"), name="static")
 templates = Jinja2Templates(directory="html")
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+SECRET_KEY = "yeahyeah" 
+app.mount("/taipei-day-trip", StaticFiles(directory="html"), name="static")
+templates = Jinja2Templates(directory="html")
 
+
+def create_jwt_token(user_id: int, name: str, email: str):
+    to_encode = {"sub": user_id, "name": name, "email": email}
+    expire = datetime.utcnow() + timedelta(days=7)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
+    return encoded_jwt
+
+def decode_jwt_token(token:str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired",
+        )
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )
 def connect_to_db():
     return mysql.connector.connect(
     host="localhost",
@@ -23,13 +55,23 @@ def connect_to_db():
     password="12345678",
     database="attractions"
 )
-def serialize_data(data):#讓資料可以換成json
-    
+def validate_user(email,password):
+     db_connection = connect_to_db()
+     cursor = db_connection.cursor()
+     query = "select id,name,email from member where email = %s and password = %s"
+     cursor.execute(query,(email,password))
+     result = cursor.fetchone()
+     cursor.close()
+     db_connection.close()
+     if result:
+          return {"id": result[0], "name": result[1], "email": result[2]}
+     return None
+def serialize_data(data):
     for key, value in data.items():
-        if isinstance(value, (date, datetime)):
-            data[key] = value.isoformat()
-        elif isinstance(value, decimal.Decimal):
+        if isinstance(value, decimal.Decimal):
             data[key] = float(value)
+        elif isinstance(value, (datetime.date, datetime.datetime)):
+            data[key] = value.isoformat()
     return data
 
 @app.get("/", response_class=HTMLResponse)
@@ -39,7 +81,55 @@ async def home(request: Request):
 @app.get("/attraction/{attractionId}", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("attractionpage.html", {"request": request})
+@app.get("/api/user/auth")
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    payload = decode_jwt_token(token)
+    return {"user_id": payload["sub"], "name": payload["name"], "email": payload["email"]}
+      
 
+@app.put("/api/user/auth")
+async def sign_in(request: Request):
+     data = await request.json()
+     email = data.get("email")
+     password = data.get("password")
+     user = validate_user(email,password)
+     if user:
+        token = create_jwt_token(user["id"],user["name"],user["email"])
+        return JSONResponse(content={"token":token}, status_code = 200)
+     else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="帳號或密碼錯誤或其他原因"
+        )
+
+
+@app.post("/api/user")
+async def register(request: Request):
+    data = await request.json()
+    name = data.get("registername")
+    email = data.get("registeremail")
+    password = data.get("registerpassword")
+
+    try:
+        db_connection = connect_to_db()
+        cursor = db_connection.cursor()
+        query = "SELECT * FROM member WHERE email = %s"
+        cursor.execute(query, (email,))
+        if cursor.fetchone():
+            return JSONResponse(content={"message": "電子信箱已被註冊"}, status_code=400)
+        insert_query = "INSERT INTO member (name, email, password) VALUES (%s, %s, %s)"
+        cursor.execute(insert_query, (name, email, password))
+        db_connection.commit()
+        cursor.close()
+        return JSONResponse(content={"message": "註冊成功"}, status_code=201)
+    finally:
+        db_connection.close()
+
+@app.post("/token")
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = validate_user(form_data.username, form_data.password)
+    token = create_jwt_token(user["id"], user["name"], user["email"])
+    return {"access_token": token, "token_type": "bearer"}  
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
 async def index(request: Request):

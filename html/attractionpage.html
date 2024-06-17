@@ -15,7 +15,7 @@
                 <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
                 <ul class="nav-links">
                     <li><a href="#">預訂行程</a></li>
-                    <li><a href="#" id="login">登入/註冊</a></li>
+                    <li id="auth-link"><a href="#" id="login">登入/註冊</a></li>
                 </ul>
             </div>
         </nav>
@@ -26,7 +26,8 @@
                 <div class="loginheader">登入會員帳號</div>
                 <form id="loginForm">
                     <input type="email" class="loginemail" id="loginemail" placeholder="輸入電子信箱" required>
-                    <input type="password" class="loginpassword" placeholder="輸入密碼" required>
+                    <input type="password" class="loginpassword" id="loginpassword" placeholder="輸入密碼" required>
+                    <div class="loginMessageContainer" id="loginMessageContainer"></div>
                     <div class="button-container">
                         <button type="submit" class="loginbutton">登入帳戶</button>
                     </div>
@@ -37,15 +38,28 @@
         <div class="registerpopup" id="registerpopup">
             <div class="registerheaderline"></div>
             <div class="registerpopup-content">
-                <span id="registerclose-btn" class="registerclose-btn"><img src="/taipei-day-trip/picture/dialog.png"></span>
+                <span id="registerclose-btn" class="registerclose-btn"><img src="/week1secondface/picture/dialog.png"></span>
                 <div class="registerheader">註冊會員帳號</div>
                 <form id="registerform">
-                    <input type="text" class="registername" placeholder="輸入姓名" required>
-                    <input type="email" class="registeremail" placeholder="輸入電子信箱" required>
-                    <input type="password" class="registerpassword" placeholder="輸入密碼" required>
-                    <div class="button-container"><button class="loginbutton">註冊新帳戶</button></div>
+                    <input type="text" id="registername" class="registername" placeholder="輸入姓名" required>
+                    <input type="email" id="registeremail" class="registeremail" placeholder="輸入電子信箱" required>
+                    <input type="password" id="registerpassword" class="registerpassword" placeholder="輸入密碼" required>
+                    <div class="registerMessageContainer" id="registerMessageContainer"></div>
+                    <div class="button-container">
+                        <button class="loginbutton">註冊新帳戶</button>
+                    </div>    
                 </form>
                 <div class="registerfooter">已經有帳戶了?<span class="registertologin" id="registertologin">點此登入</span></div>
+            </div>
+        </div>
+        <div class="logoutpopup" id="logoutpopup">
+            <div class="logoutheaderline"></div>
+            <div class="logoutpopup-content">
+                <span id="logoutclose-btn" class="logoutclose-btn"><img src="/week1secondface/picture/dialog.png"></span>
+                <div class="logoutheader">要登出嗎?</div>
+                <div class="logoutbutton-container">
+                    <button id="logoutbutton" type="button" class="logoutbutton">確定</button>
+                </div>  
             </div>
         </div>
         <div id="overlay" class="overlay"></div>
@@ -99,33 +113,139 @@
         </footer>
     </div>
         <script>
-                        document.getElementById("login").addEventListener("click", function(){
-                document.getElementById('loginpopup').style.display = 'block';
-                document.getElementById('overlay').style.display = 'block';
-            })
+            //popup表單切換
+            document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const authLink = document.getElementById('auth-link');
+
+            if (token) {
+                // 已登入，顯示登出選項
+                authLink.innerHTML = '<a href="#" id="logout">登出系統</a>';
+                document.getElementById('logout').addEventListener('click', function(){
+                    document.getElementById('logoutpopup').style.display = 'block';
+                    document.getElementById('overlay').style.display = 'block';
+                });
+                document.getElementById('logoutbutton').addEventListener('click', function() {
+                    localStorage.removeItem('token');  
+                    window.location.reload();  
+                });
+                document.getElementById('logoutclose-btn').addEventListener('click', function(){
+                    document.getElementById('logoutpopup').style.display = 'none';
+                    document.getElementById('overlay').style.display = 'none';
+                });
+            } else {
+                // 未登入，顯示登入/註冊選項
+                authLink.innerHTML = '<a href="#" id="login">登入/註冊</a>';
+                document.getElementById('login').addEventListener('click', function(){
+                    document.getElementById('loginpopup').style.display = 'block';
+                    document.getElementById('overlay').style.display = 'block';
+                });
+            }
+
+            //overlay
             document.getElementById('overlay').addEventListener('click', function(){
                 document.getElementById('loginpopup').style.display = 'none';
                 document.getElementById('overlay').style.display = 'none';
                 document.getElementById('registerpopup').style.display = 'none';
-            })
+                document.getElementById('logoutpopup').style.display = 'none';
+            });
+
+            // 登入表單的關閉按鈕
             document.getElementById('loginclose-btn').addEventListener('click', function(){
                 document.getElementById('loginpopup').style.display = 'none';
                 document.getElementById('overlay').style.display = 'none';
-            })
-            document.getElementById("logintoregister").addEventListener("click", function(){
+            });
+
+            // 註冊表單的切換按鈕
+            document.getElementById('logintoregister').addEventListener('click', function(){
                 document.getElementById('loginpopup').style.display = 'none';
                 document.getElementById('registerpopup').style.display = 'block';
-            })
-            document.getElementById("registertologin").addEventListener("click", function(){
+            });
+
+            // 註冊表單的返回按鈕
+            document.getElementById('registertologin').addEventListener('click', function(){
                 document.getElementById('loginpopup').style.display = 'block';
                 document.getElementById('registerpopup').style.display = 'none';
-            })
+            });
+
+            // 註冊表單的關閉按鈕
             document.getElementById('registerclose-btn').addEventListener('click', function(){
                 document.getElementById('registerpopup').style.display = 'none';
                 document.getElementById('overlay').style.display = 'none';
-            })
+            });
+        });
 
+         //登入
+         document.getElementById('loginForm').addEventListener("submit", async (loginevent) => {
+                loginevent.preventDefault();  // 阻止預設表單提交行為
+                const loginemail = document.getElementById('loginemail').value;
+                const loginpassword = document.getElementById('loginpassword').value;
+                const loginmessageContainer = document.getElementById('loginMessageContainer');
+                loginmessageContainer.innerHTML = ''; // 清空之前的訊息
+                try {
+                    let response = await fetch('http://18.209.3.48:8000/api/user/auth',{
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ loginemail, loginpassword })
+                    });
+                    if (response.ok) {
+                            const data = await response.json();
+                            if (data.redirect) {
+                            window.location.reload();  // 刷新頁面
+                        }
+                        } else {
+                            const errorData = await response.json();
+                            loginmessageContainer.textContent = "帳號或密碼錯誤";
+                            loginmessageContainer.style.color = 'red';
+                            document.querySelector('.loginpopup').style.height = '290px';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                                }
+            });
+            //註冊
+            document.addEventListener('DOMContentLoaded', (event) => {
+                document.getElementById('registerform').addEventListener('submit', async (registerevent) => {
+                    registerevent.preventDefault();  // 阻止預設表單提交行為
 
+                    const registername = document.getElementById('registername').value;
+                    const registeremail = document.getElementById('registeremail').value;
+                    const registerpassword = document.getElementById('registerpassword').value;
+
+                    const messageContainer = document.getElementById('registerMessageContainer');
+                    messageContainer.innerHTML = ''; // 清空之前的訊息
+
+                    try {
+                        let response = await fetch('http://18.209.3.48:8000/api/user', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ registername, registeremail, registerpassword })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            messageContainer.textContent = "註冊成功";
+                            messageContainer.style.color = 'green';
+                            document.querySelector('.registerpopup').style.height = '350px';
+                        } else {
+                            const errorData = await response.json();
+                            messageContainer.textContent = errorData.message;
+                            messageContainer.style.color = 'red';
+                            document.querySelector('.registerpopup').style.height = '350px';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        messageContainer.textContent = '註冊時出現錯誤';
+                        messageContainer.style.color = 'red';
+                        document.querySelector('.registerpopup').style.height = '350px';
+                    }
+                });
+            });
+        //幻燈片
             let totalSlides = 0;
             let numbers = 0;
             document.addEventListener('DOMContentLoaded', () => {
