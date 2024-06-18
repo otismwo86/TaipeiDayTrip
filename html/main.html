@@ -436,30 +436,6 @@
             let footerTarget = document.querySelector('.footer');
             footerObserver.observe(footerTarget);
         });
-        async function getCurrentUser() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('No token found, user is not logged in');
-                return;
-            }
-
-            let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`  // 在這裡添加 Bearer token
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Current user:', data);
-                // 處理成功獲取用戶信息的邏輯
-            } else {
-                console.error('Failed to fetch current user:', response.status);
-                // 處理未授權或其他錯誤
-            }
-        }
         </script>
             
 
