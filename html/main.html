@@ -97,73 +97,95 @@
             <div class="footer-content">COPYRIGHT © 2021 台北一日遊<div>
         </footer>
         <script>
-             // 呼叫 getCurrentUser 函數檢查當前用戶資訊
+            // popup表單切換
             document.addEventListener('DOMContentLoaded', () => {
-                getCurrentUser();
-                console.log("Hello")
-            });
-            //popup表單切換
-            document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
-            const authLink = document.getElementById('auth-link');
+                    getCurrentUser(); // 檢查當前用戶資訊
+                });
 
-            if (token) {
-                // 已登入，顯示登出選項
-                authLink.innerHTML = '<a href="#" id="logout">登出系統</a>';
-                document.getElementById('logout').addEventListener('click', function(){
-                    document.getElementById('logoutpopup').style.display = 'block';
-                    document.getElementById('overlay').style.display = 'block';
-                });
-                document.getElementById('logoutbutton').addEventListener('click', function() {
-                    localStorage.removeItem('token');  
-                    window.location.reload();  
-                });
-                document.getElementById('logoutclose-btn').addEventListener('click', function(){
+                // 檢查當前用戶資訊函數
+                async function getCurrentUser() {
+                    const token = localStorage.getItem('token');
+                    const authLink = document.getElementById('auth-link');
+                    
+                    if (token) {
+                        try {
+                            let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`  // 添加 Bearer token
+                                }
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                // 已登入，顯示登出選項
+                                authLink.innerHTML = '<a href="#" id="logout">登出系統</a>';
+                                document.getElementById('logout').addEventListener('click', function() {
+                                    document.getElementById('logoutpopup').style.display = 'block';
+                                    document.getElementById('overlay').style.display = 'block';
+                                });
+                                document.getElementById('logoutbutton').addEventListener('click', function() {
+                                    localStorage.removeItem('token');  
+                                    window.location.reload();  
+                                });
+                                document.getElementById('logoutclose-btn').addEventListener('click', function() {
+                                    document.getElementById('logoutpopup').style.display = 'none';
+                                    document.getElementById('overlay').style.display = 'none';
+                                });
+                            } else {
+                                // Token無效，顯示登入/註冊選項
+                                showLoginRegisterOption(authLink);
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showLoginRegisterOption(authLink);
+                        }
+                    } else {
+                        // 沒有token，顯示登入/註冊選項
+                        showLoginRegisterOption(authLink);
+                    }
+                }
+
+                function showLoginRegisterOption(authLink) {
+                    authLink.innerHTML = '<a href="#" id="login">登入/註冊</a>';
+                    document.getElementById('login').addEventListener('click', function() {
+                        document.getElementById('loginpopup').style.display = 'block';
+                        document.getElementById('overlay').style.display = 'block';
+                    });
+                }
+
+                // overlay
+                document.getElementById('overlay').addEventListener('click', function() {
+                    document.getElementById('loginpopup').style.display = 'none';
+                    document.getElementById('overlay').style.display = 'none';
+                    document.getElementById('registerpopup').style.display = 'none';
                     document.getElementById('logoutpopup').style.display = 'none';
+                });
+
+                // 登入表單的關閉按鈕
+                document.getElementById('loginclose-btn').addEventListener('click', function() {
+                    document.getElementById('loginpopup').style.display = 'none';
                     document.getElementById('overlay').style.display = 'none';
                 });
-            } else {
-                // 未登入，顯示登入/註冊選項
-                authLink.innerHTML = '<a href="#" id="login">登入/註冊</a>';
-                document.getElementById('login').addEventListener('click', function(){
-                    document.getElementById('loginpopup').style.display = 'block';
-                    document.getElementById('overlay').style.display = 'block';
+
+                // 註冊表單的切換按鈕
+                document.getElementById('logintoregister').addEventListener('click', function() {
+                    document.getElementById('loginpopup').style.display = 'none';
+                    document.getElementById('registerpopup').style.display = 'block';
                 });
-            }
 
-            //overlay
-            document.getElementById('overlay').addEventListener('click', function(){
-                document.getElementById('loginpopup').style.display = 'none';
-                document.getElementById('overlay').style.display = 'none';
-                document.getElementById('registerpopup').style.display = 'none';
-                document.getElementById('logoutpopup').style.display = 'none';
-            });
+                // 註冊表單的返回按鈕
+                document.getElementById('registertologin').addEventListener('click', function() {
+                    document.getElementById('loginpopup').style.display = 'block';
+                    document.getElementById('registerpopup').style.display = 'none';
+                });
 
-            // 登入表單的關閉按鈕
-            document.getElementById('loginclose-btn').addEventListener('click', function(){
-                document.getElementById('loginpopup').style.display = 'none';
-                document.getElementById('overlay').style.display = 'none';
-            });
-
-            // 註冊表單的切換按鈕
-            document.getElementById('logintoregister').addEventListener('click', function(){
-                document.getElementById('loginpopup').style.display = 'none';
-                document.getElementById('registerpopup').style.display = 'block';
-            });
-
-            // 註冊表單的返回按鈕
-            document.getElementById('registertologin').addEventListener('click', function(){
-                document.getElementById('loginpopup').style.display = 'block';
-                document.getElementById('registerpopup').style.display = 'none';
-            });
-
-            // 註冊表單的關閉按鈕
-            document.getElementById('registerclose-btn').addEventListener('click', function(){
-                document.getElementById('registerpopup').style.display = 'none';
-                document.getElementById('overlay').style.display = 'none';
-            });
-        });
-
+                // 註冊表單的關閉按鈕
+                document.getElementById('registerclose-btn').addEventListener('click', function() {
+                    document.getElementById('registerpopup').style.display = 'none';
+                    document.getElementById('overlay').style.display = 'none';
+                });
         //登入
         document.getElementById('loginForm').addEventListener("submit", async (loginevent) => {
                 loginevent.preventDefault();  // 阻止預設表單提交行為
