@@ -163,11 +163,11 @@ async def create_booking(request: Request, token: str = Depends(oauth2_scheme)):
         db_connection = connect_to_db()
         cursor = db_connection.cursor()
 
-        delete_query = "DELETE FROM Bookings WHERE user_id = %s"
+        delete_query = "DELETE FROM bookings WHERE user_id = %s"
         cursor.execute(delete_query, (user_id,))
         
         insert_query = """
-            INSERT INTO Bookings (user_id, attraction_id, date, time, price)
+            INSERT INTO bookings (user_id, attraction_id, date, time, price)
             VALUES (%s, %s, %s, %s, %s)
         """
         cursor.execute(insert_query, (user_id, attraction_id, date, time, price))
@@ -185,7 +185,7 @@ async def home(request: Request,token: str = Depends(oauth2_scheme)):
     try:
          db_connection = connect_to_db()
          cursor = db_connection.cursor()
-         query = "DELETE FROM Bookings WHERE user_id = %s"
+         query = "DELETE FROM bookings WHERE user_id = %s"
          cursor.execute(query,(user_id,))
          db_connection.commit()
          cursor.close()

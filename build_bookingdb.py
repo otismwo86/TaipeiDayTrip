@@ -10,7 +10,7 @@ conn = mysql.connector.connect(
 )
 cursor = conn.cursor()
 
-cursor.execute("""CREATE TABLE Bookings (
+cursor.execute("""CREATE TABLE bookings (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     user_id INT NOT NULL,
                     attraction_id INT NOT NULL,
