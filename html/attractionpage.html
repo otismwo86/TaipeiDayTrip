@@ -14,7 +14,7 @@
             <div class="container">
                 <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
                 <ul class="nav-links">
-                    <li><a href="#">預訂行程</a></li>
+                    <li id="booking-link"><a href="#">預訂行程</a></li>
                     <li id="auth-link"><a href="#" id="login">登入/註冊</a></li>
                 </ul>
             </div>
@@ -89,7 +89,8 @@
                         <label for="afternoon">下半天</label>
                     </div>
                     <div class="booking-price">導覽費用 : <span id="price"></span></div>
-                    <button class="booking-button">開始預約行程</button>
+                    <button id="booking-button" class="booking-button">開始預約行程</button>
+                    <span id="booking-button-time" class="booking-button-time">請選擇時段</span>
                 </div>
             </div>
             <hr>
@@ -122,7 +123,8 @@
                 async function getCurrentUser() {
                     const token = localStorage.getItem('token');
                     const authLink = document.getElementById('auth-link');
-                    
+                    const bookinglink = document.getElementById('booking-link').querySelector('a');
+
                     if (token) {
                         try {
                             let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
@@ -137,6 +139,7 @@
                                 const data = await response.json();
                                 // 已登入，顯示登出選項
                                 authLink.innerHTML = '<a href="#" id="logout">登出系統</a>';
+                                bookinglink.href = 'http://18.209.3.48:8000/booking';
                                 document.getElementById('logout').addEventListener('click', function() {
                                     document.getElementById('logoutpopup').style.display = 'block';
                                     document.getElementById('overlay').style.display = 'block';
@@ -169,8 +172,15 @@
                         document.getElementById('loginpopup').style.display = 'block';
                         document.getElementById('overlay').style.display = 'block';
                     });
+                    document.getElementById('booking-link').addEventListener('click', function() {
+                        document.getElementById('loginpopup').style.display = 'block';
+                        document.getElementById('overlay').style.display = 'block';
+                    });
+                    document.getElementById('booking-button').addEventListener('click', function() {
+                        document.getElementById('loginpopup').style.display = 'block';
+                        document.getElementById('overlay').style.display = 'block';
+                    });
                 }
-
 
                 // overlay
                 document.getElementById('overlay').addEventListener('click', function() {
@@ -399,6 +409,72 @@
                     document.getElementById('price').textContent = '新台幣 2500元';
                 }
             })
+
+            //點擊預約行程
+            document.getElementById("booking-button").addEventListener("click", async function(){
+            const token = localStorage.getItem('token');
+            const authLink = document.getElementById('auth-link');
+            let morning = document.getElementById("morning").checked;
+            let afternoon = document.getElementById("afternoon").checked;
+            let message = document.getElementById("booking-button-time");
+            let date = document.getElementById("dateInput").value;
+            const url = window.location.href;
+            const attractionId = parseInt(url.split('/').pop());
+            let time;
+            let price;
+            if (morning) {
+                time = 'morning';
+                price = 2000;
+            } else if (afternoon) {
+                time = 'afternoon';
+                price = 2500;
+            }
+            try {
+                let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
+
+                if (response.ok) {
+                    console.log("Hello")
+                    let data = await response.json();
+                    let userId = data.user_id;
+                    if (!morning && !afternoon) {
+                        message.style.display = "inline";
+                    } else {
+                        let bookingresponse = await fetch('http://18.209.3.48:8000/api/booking', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                user_id: userId,
+                                attraction_id: attractionId,
+                                date: date,
+                                time: time,
+                                price: price
+                            })
+                        });
+
+                        if (bookingresponse.ok) {
+                            window.location.href = 'http://18.209.3.48:8000/booking';
+                        } else {
+                            // 處理預訂失敗的情況
+                            console.error('Booking failed');
+                        }
+                    }
+                } else {
+                    showLoginRegisterOption(authLink);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showLoginRegisterOption(authLink);
+            }
+        });
         </script>
 
     </body>

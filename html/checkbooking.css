@@ -1,0 +1,463 @@
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar {
+    background-color: white;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #E8E8E8;
+}
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 1200px;
+    margin: 0 auto;
+    
+}
+
+.logo {
+    font-size: 30px;
+    text-decoration: none;
+    color: #448899;
+    font-weight: bold;
+    height: 34px;
+    padding-bottom: 10px;
+}
+
+.nav-links {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    border-radius: 5px;
+    align-items: center;
+    height: 32px;
+}
+
+.nav-links li {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    height: 34px;
+    
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: gray;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 5px;
+}
+.logoutpopup{
+    position: fixed;
+    display: none;
+    z-index: 1001;
+    left: 50%;
+    top: 25%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 340px;
+    height: 130px;
+    border-radius: 5px;
+}
+.logoutheaderline{
+    width:100%;
+    height:10px;
+    background: linear-gradient(to right,  #66AABB 0%, #337788 100%);
+    border-radius: 5px 5px 0 0;
+}
+.logoutpopup-content{
+    position: relative;
+}
+.logoutclose-btn {
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    cursor: pointer;
+}
+.logoutclose-btn img {
+    width:16px;
+    height:16px;
+}
+.logoutheader{
+    display: flex;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 24px;
+    color: #666666;
+    margin-top: 8px;
+}
+.logoutbutton-container {
+    text-align: center;
+}
+.logoutbutton{
+    width:310px;
+    height:47px;
+    color: white;
+    background-color: #448899;
+    border: none;
+    border-radius: 5px;
+    margin: 8px auto 0 auto;
+    font-size: 19px;
+}
+.logoutbutton:hover{
+    cursor: pointer;
+    background-color: #336677;
+}
+.overlay {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+.info{
+    font-weight:700;
+    margin-top: 104px;
+    width: 1000px;
+    text-align: left;
+    margin: 104px auto 20px ;
+}
+.info-container{
+    font-size: 19px;
+    color: #666666;
+}
+
+.bookinginfo-container{
+    width:980px;
+    height:200px;
+    margin: 0px auto 50px;
+}
+.booking-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.booking-image {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.booking-image img {
+    width:250px;
+    height:200px;
+    
+}
+
+.booking-details {
+    flex: 3;
+}
+.booking-details h3{
+    color:#448899;
+    font-size: 16px;
+    font-weight:700;
+}
+.booking-details p{
+    color:#666666;
+    font-size: 16px;
+    font-weight:400;
+}
+.booking-action {
+    position: absolute;
+    top: 10px;
+    right: 10px
+}
+.booking-action img{
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
+}
+.nobooking{
+    width: 1000px;
+    text-align: left;
+    margin: 0px auto 40px;
+}
+.nobooking-container{
+    font-size: 16px;
+    font-weight:400;
+    color: #666666;
+}
+.firstline{
+    align-items: center;
+    width:1200px;
+    border-bottom: 1px solid #E8E8E8;
+    margin: 5px auto;
+}
+.line{
+    align-items: center;
+    width:1200px;
+    border-bottom: 1px solid #E8E8E8;
+    margin: 5px auto;
+}
+.contact-info{
+    display:none;
+    width:980px;
+    height:227px;
+    margin: 50px auto;
+    text-align: left;
+}
+.contact-info input[type="text"] {
+    font-family: 'Noto Sans TC', sans-serif;
+    width: 200px; 
+    padding: 10px; 
+    margin: 5px 0;
+    box-sizing: border-box; 
+    border: 1px solid #E8E8E8;
+    border-radius: 3px; 
+    font-size: 16px; 
+    font-weight: 500;
+    color: #000000;
+}
+.contact-info-header{
+    font-size: 19px;
+    font-weight:700;
+    text-align: left;
+    color:#666666;
+}
+.contact-info-name{
+    margin-top: 3px;
+    font-size: 16px;
+    font-weight:400;
+    color:#666666;
+}
+.contact-info-email{
+    margin-top: 3px;
+    font-size: 16px;
+    font-weight:400;
+    color:#666666;
+}
+.contact-info-number{
+    margin-top: 3px;
+    font-size: 16px;
+    font-weight:400;
+    color:#666666;
+}
+.contact-info-footer{
+    margin-top: 3px;
+    font-size: 16px;
+    font-weight:700;
+    color:#666666;
+}
+.creditcard-info{
+    display:none;
+    width:980px;
+    height:188px;
+    margin: 30px auto;
+    text-align: left;
+}
+.creditcard-info input[type="text"] {
+    font-family: 'Noto Sans TC', sans-serif;
+    width: 200px; 
+    padding: 10px; 
+    margin: 5px 0;
+    box-sizing: border-box; 
+    border: 1px solid #E8E8E8;
+    border-radius: 3px; 
+    font-size: 16px; 
+    font-weight: 500;
+    color: #000000;
+}
+.creditcard-info-header{
+    font-size: 19px;
+    font-weight:700;
+    text-align: left;
+    color:#666666;
+}
+.creditcard-info-number{
+    margin-top: 3px;
+    font-size: 16px;
+    font-weight:400;
+    color:#666666;
+}
+.creditcard-info-expire{
+    margin-top: 3px;
+    font-size: 16px;
+    font-weight:400;
+    color:#666666;
+}
+.creditcard-info-code{
+    margin-top: 3px;
+    font-size: 16px;
+    font-weight:400;
+    color:#666666;
+}
+.paymentinfo{
+    width: 980px;
+    height:100px;
+    margin: 0 auto 50px;
+}
+.payment{
+    color:#666666;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    text-align: right;
+}
+.paybutton{
+    width: 173px;
+    height:36px;
+    background-color: #448899;
+    color:white;
+    border-radius: 5px;
+    font-size: 19px;
+    font-weight: 400;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 30px;
+    float:right;
+}
+.paybutton:hover{
+    background-color: #336677;
+}
+.footer {
+    display: flex;
+    background-color: #757575;
+    color: white;
+    justify-content: center;    
+    padding-top: 50px;;
+    height: 865px;
+}
+
+.footer-content{
+    font-weight:bold;
+}
+
+@media(max-width:1250px){
+    .firstline{
+    width:900px;
+    }
+   .line{
+    width:900px;
+   }
+   .info{
+    width:900px;
+   }
+   .nobooking{
+    width:900px;
+   }
+   .contact-info{
+    width:900px;
+   }
+   .creditcard-info{
+    width:900px;
+   }
+   .paymentinfo{
+    width:900px;
+    }
+   .bookinginfo-container{
+        width:900px;   
+    }
+}
+
+@media(max-width:950px){
+    .firstline{
+        width:550px;
+    }
+    .line{
+        width:550px;
+    }
+    .info{
+        width:500px;
+    }
+    .nobooking{
+        width:500px;
+    }
+    .contact-info{
+        width:550px;
+    }
+    .creditcard-info{
+        width:550px;
+    }
+    .paymentinfo{
+        width:550px;
+    }
+    .bookinginfo-container{
+        width:550px;   
+    }
+}
+
+
+@media(max-width:600px){
+    .container {
+        width: 100%;
+    }
+    .logo {
+        padding-left:10px;
+    }
+    .info{
+        width:340px;
+    }
+    .nobooking{
+        width:340px;
+    }
+    .nav-links li {
+        padding: 0;
+    }
+    .firstline{
+        margin-top: 250px;
+        width:340px;
+    }
+    .line{
+        width:340px;
+    }
+    .contact-info{
+        width:340px;
+    }
+    .creditcard-info{
+        width:340px;
+    }
+    .paymentinfo{
+        width:340px;
+    }
+    .bookinginfo-container{
+        width:340px;   
+    }
+    .booking-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .booking-image {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .booking-details {
+        width: 100%;
+    }
+
+    .booking-action {
+        position: static;
+        margin-top: 10px;
+        text-align: right;
+        width: 100%;
+    }
+
+    .booking-action img {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+

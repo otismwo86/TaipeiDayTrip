@@ -18,12 +18,11 @@ import datetime as dt
 
 app=FastAPI()
 
-app.mount("/week1secondface", StaticFiles(directory="html"), name="static")
-templates = Jinja2Templates(directory="html")
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 SECRET_KEY = "yeahyeah" 
-app.mount("/taipei-day-trip", StaticFiles(directory="html"), name="static")
+app.mount("/week1secondface", StaticFiles(directory="html"), name="static")
 templates = Jinja2Templates(directory="html")
 
 
@@ -125,11 +124,75 @@ async def register(request: Request):
     finally:
         db_connection.close()
 
-@app.post("/token")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = validate_user(form_data.username, form_data.password)
-    token = create_jwt_token(user["id"], user["name"], user["email"])
-    return {"access_token": token, "token_type": "bearer"}  
+@app.get("/booking", response_class=HTMLResponse)
+async def home(request: Request):  
+    return templates.TemplateResponse("checkbooking.html", {"request": request}) 
+
+
+#booking api
+#fetch行程
+@app.get("/api/booking")
+async def home(token: str = Depends(oauth2_scheme)):  
+    payload = decode_jwt_token(token)
+    user_id = payload["sub"]
+    try:
+        db_connection = connect_to_db()
+        cursor = db_connection.cursor(dictionary=True)
+        query="""select bookings.id, attractions.name, bookings.date, bookings.time, bookings.price, attractions.address, attractions.id as attrid
+                from bookings Join attractions on bookings.attraction_id = attractions.id where bookings.user_id = %s"""
+        cursor.execute(query, (user_id,))
+        bookings = cursor.fetchone()
+        serialized_bookings = serialize_data(bookings)
+        cursor.close()
+        return JSONResponse(content=serialized_bookings, status_code=200)
+    finally:
+        db_connection.close()
+
+#建立行程
+@app.post("/api/booking")
+async def create_booking(request: Request, token: str = Depends(oauth2_scheme)):
+    data = await request.json()
+    payload = decode_jwt_token(token)
+    user_id = payload["sub"]
+    attraction_id = data.get("attraction_id")
+    date = data.get("date")
+    time = data.get("time")
+    price = data.get("price")
+
+    try:
+        db_connection = connect_to_db()
+        cursor = db_connection.cursor()
+
+        delete_query = "DELETE FROM Bookings WHERE user_id = %s"
+        cursor.execute(delete_query, (user_id,))
+        
+        insert_query = """
+            INSERT INTO Bookings (user_id, attraction_id, date, time, price)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (user_id, attraction_id, date, time, price))
+        db_connection.commit()
+        cursor.close()
+        return JSONResponse(content={"message": "預訂成功"}, status_code=201)
+    finally:
+        db_connection.close()
+
+#刪除行程
+@app.delete("/api/booking")
+async def home(request: Request,token: str = Depends(oauth2_scheme)):  
+    payload = decode_jwt_token(token)
+    user_id = payload["sub"]
+    try:
+         db_connection = connect_to_db()
+         cursor = db_connection.cursor()
+         query = "DELETE FROM Bookings WHERE user_id = %s"
+         cursor.execute(query,(user_id,))
+         db_connection.commit()
+         cursor.close()
+         return JSONResponse(content={"message": "Booking deleted successfully"}, status_code=200)
+    finally:
+        db_connection.close()
+
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
 async def index(request: Request):
