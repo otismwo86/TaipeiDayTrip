@@ -138,8 +138,8 @@ async def home(token: str = Depends(oauth2_scheme)):
     try:
         db_connection = connect_to_db()
         cursor = db_connection.cursor(dictionary=True)
-        query="""select bookings.id, attractions.name, bookings.date, bookings.time, bookings.price, attractions.address, attractions.id as attrid
-                from bookings Join attractions on bookings.attraction_id = attractions.id where bookings.user_id = %s"""
+        query="""select Bookings.id, attractions.name, Bookings.date, Bookings.time, Bookings.price, attractions.address, attractions.id as attrid
+                from Bookings Join attractions on Bookings.attraction_id = attractions.id where Bookings.user_id = %s"""
         cursor.execute(query, (user_id,))
         bookings = cursor.fetchone()
         serialized_bookings = serialize_data(bookings)
@@ -163,11 +163,11 @@ async def create_booking(request: Request, token: str = Depends(oauth2_scheme)):
         db_connection = connect_to_db()
         cursor = db_connection.cursor()
 
-        delete_query = "DELETE FROM bookings WHERE user_id = %s"
+        delete_query = "DELETE FROM Bookings WHERE user_id = %s"
         cursor.execute(delete_query, (user_id,))
         
         insert_query = """
-            INSERT INTO bookings (user_id, attraction_id, date, time, price)
+            INSERT INTO Bookings (user_id, attraction_id, date, time, price)
             VALUES (%s, %s, %s, %s, %s)
         """
         cursor.execute(insert_query, (user_id, attraction_id, date, time, price))
@@ -185,7 +185,7 @@ async def home(request: Request,token: str = Depends(oauth2_scheme)):
     try:
          db_connection = connect_to_db()
          cursor = db_connection.cursor()
-         query = "DELETE FROM bookings WHERE user_id = %s"
+         query = "DELETE FROM Bookings WHERE user_id = %s"
          cursor.execute(query,(user_id,))
          db_connection.commit()
          cursor.close()
