@@ -15,10 +15,55 @@
                 <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
                 <ul class="nav-links">
                     <li><a href="#">預訂行程</a></li>
-                    <li><a href="#">登入/註冊</a></li>
+                    <li id="auth-link"><a href="#" id="login">登入/註冊</a></li>
                 </ul>
             </div>
         </nav>
+        <div class="loginpopup" id="loginpopup">
+            <div class="loginheaderline"></div>
+            <div class="loginpopup-content">
+                <span id="loginclose-btn" class="loginclose-btn"><img src="/week1secondface/picture/dialog.png"></span>
+                <div class="loginheader">登入會員帳號</div>
+                <form id="loginForm">
+                    <input type="email" class="loginemail" id="loginemail" placeholder="輸入電子信箱" required>
+                    <input type="password" class="loginpassword" id="loginpassword" placeholder="輸入密碼" required>
+                    <div class="loginMessageContainer" id="loginMessageContainer"></div>
+                    <div class="button-container">
+                        <button type="submit" class="loginbutton">登入帳戶</button>
+                    </div>
+                </form>
+                <div class="loginfooter">還沒有帳戶?<span class="logintoregister" id="logintoregister">點此註冊</span></div>
+            </div>
+        </div>
+        <div class="registerpopup" id="registerpopup">
+            <div class="registerheaderline"></div>
+            <div class="registerpopup-content">
+                <span id="registerclose-btn" class="registerclose-btn"><img src="/week1secondface/picture/dialog.png"></span>
+                <div class="registerheader">註冊會員帳號</div>
+                <form id="registerform">
+                    <input type="text" id="registername" class="registername" placeholder="輸入姓名" required>
+                    <input type="email" id="registeremail" class="registeremail" placeholder="輸入電子信箱" required>
+                    <input type="password" id="registerpassword" class="registerpassword" placeholder="輸入密碼" required>
+                    <div class="registerMessageContainer" id="registerMessageContainer"></div>
+                    <div class="button-container">
+                        <button class="loginbutton">註冊新帳戶</button>
+                    </div>    
+                </form>
+                <div class="registerfooter">已經有帳戶了?<span class="registertologin" id="registertologin">點此登入</span></div>
+            </div>
+        </div>
+        <div class="logoutpopup" id="logoutpopup">
+            <div class="logoutheaderline"></div>
+            <div class="logoutpopup-content">
+                <span id="logoutclose-btn" class="logoutclose-btn"><img src="/week1secondface/picture/dialog.png"></span>
+                <div class="logoutheader">要登出嗎?</div>
+                <div class="logoutbutton-container">
+                    <button id="logoutbutton" type="button" class="logoutbutton">確定</button>
+                </div>  
+            </div>
+        </div>
+        <div id="overlay" class="overlay"></div>
+
         <div class="main-container">
             <div class="slideshow-container">
                 <div class="slideshow-inner" id="slideshowInner">
@@ -54,7 +99,7 @@
             <div class="section-title">
                 景點地址:
             </div>
-            <div class="address"></div>
+            <a href="#" class="address" target="_blank"></a>
             <div class="section-title">
                 交通方式:
             </div>
@@ -68,6 +113,168 @@
         </footer>
     </div>
         <script>
+           // popup表單切換
+           document.addEventListener('DOMContentLoaded', () => {
+                    getCurrentUser(); // 檢查當前用戶資訊
+                });
+
+                // 檢查當前用戶資訊函數
+                async function getCurrentUser() {
+                    const token = localStorage.getItem('token');
+                    const authLink = document.getElementById('auth-link');
+                    
+                    if (token) {
+                        try {
+                            let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`  // 添加 Bearer token
+                                }
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                // 已登入，顯示登出選項
+                                authLink.innerHTML = '<a href="#" id="logout">登出系統</a>';
+                                document.getElementById('logout').addEventListener('click', function() {
+                                    document.getElementById('logoutpopup').style.display = 'block';
+                                    document.getElementById('overlay').style.display = 'block';
+                                });
+                                document.getElementById('logoutbutton').addEventListener('click', function() {
+                                    localStorage.removeItem('token');  
+                                    window.location.reload();  
+                                });
+                                document.getElementById('logoutclose-btn').addEventListener('click', function() {
+                                    document.getElementById('logoutpopup').style.display = 'none';
+                                    document.getElementById('overlay').style.display = 'none';
+                                });
+                            } else {
+                                // Token無效，顯示登入/註冊選項
+                                showLoginRegisterOption(authLink);
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showLoginRegisterOption(authLink);
+                        }
+                    } else {
+                        // 沒有token，顯示登入/註冊選項
+                        showLoginRegisterOption(authLink);
+                    }
+                }
+
+                function showLoginRegisterOption(authLink) {
+                    authLink.innerHTML = '<a href="#" id="login">登入/註冊</a>';
+                    document.getElementById('login').addEventListener('click', function() {
+                        document.getElementById('loginpopup').style.display = 'block';
+                        document.getElementById('overlay').style.display = 'block';
+                    });
+                }
+
+
+                // overlay
+                document.getElementById('overlay').addEventListener('click', function() {
+                    document.getElementById('loginpopup').style.display = 'none';
+                    document.getElementById('overlay').style.display = 'none';
+                    document.getElementById('registerpopup').style.display = 'none';
+                    document.getElementById('logoutpopup').style.display = 'none';
+                });
+
+                // 登入表單的關閉按鈕
+                document.getElementById('loginclose-btn').addEventListener('click', function() {
+                    document.getElementById('loginpopup').style.display = 'none';
+                    document.getElementById('overlay').style.display = 'none';
+                });
+
+                // 註冊表單的切換按鈕
+                document.getElementById('logintoregister').addEventListener('click', function() {
+                    document.getElementById('loginpopup').style.display = 'none';
+                    document.getElementById('registerpopup').style.display = 'block';
+                });
+
+                // 註冊表單的返回按鈕
+                document.getElementById('registertologin').addEventListener('click', function() {
+                    document.getElementById('loginpopup').style.display = 'block';
+                    document.getElementById('registerpopup').style.display = 'none';
+                });
+
+                // 註冊表單的關閉按鈕
+                document.getElementById('registerclose-btn').addEventListener('click', function() {
+                    document.getElementById('registerpopup').style.display = 'none';
+                    document.getElementById('overlay').style.display = 'none';
+                });
+
+         //登入
+         document.getElementById('loginForm').addEventListener("submit", async (loginevent) => {
+                loginevent.preventDefault();  // 阻止預設表單提交行為
+                const loginemail = document.getElementById('loginemail').value;
+                const loginpassword = document.getElementById('loginpassword').value;
+                const loginmessageContainer = document.getElementById('loginMessageContainer');
+                loginmessageContainer.innerHTML = ''; // 清空之前的訊息
+                try {
+                    let response = await fetch('http://18.209.3.48:8000/api/user/auth',{
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email: loginemail, password: loginpassword })
+                    });
+                    if (response.ok) {
+                            const data = await response.json();
+                            localStorage.setItem('token', data.token);
+                            window.location.reload();  // 刷新頁面
+                        
+                        } else {
+                            const errorData = await response.json();
+                            loginmessageContainer.textContent = "帳號或密碼錯誤";
+                            loginmessageContainer.style.color = 'red';
+                            document.querySelector('.loginpopup').style.height = '290px';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                                }
+            });
+            //註冊
+            document.addEventListener('DOMContentLoaded', (event) => {
+                document.getElementById('registerform').addEventListener('submit', async (registerevent) => {
+                    registerevent.preventDefault();  // 阻止預設表單提交行為
+
+                    const registername = document.getElementById('registername').value;
+                    const registeremail = document.getElementById('registeremail').value;
+                    const registerpassword = document.getElementById('registerpassword').value;
+
+                    const messageContainer = document.getElementById('registerMessageContainer');
+                    messageContainer.innerHTML = ''; // 清空之前的訊息
+
+                    try {
+                        let response = await fetch('http://18.209.3.48:8000/api/user', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ registername, registeremail, registerpassword })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            messageContainer.textContent = "註冊成功";
+                            messageContainer.style.color = 'green';
+                            document.querySelector('.registerpopup').style.height = '350px';
+                        } else {
+                            const errorData = await response.json();
+                            messageContainer.textContent = errorData.message;
+                            messageContainer.style.color = 'red';
+                            document.querySelector('.registerpopup').style.height = '350px';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        messageContainer.textContent = '註冊時出現錯誤';
+                        messageContainer.style.color = 'red';
+                        document.querySelector('.registerpopup').style.height = '350px';
+                    }
+                });
+            });
+        //幻燈片
             let totalSlides = 0;
             let numbers = 0;
             document.addEventListener('DOMContentLoaded', () => {
@@ -121,8 +328,15 @@
                         placenameDiv.textContent = data.data.mrt + ' at ' + data.data.category
                         let descriptionDiv = document.querySelector('.description');
                         descriptionDiv.textContent = data.data.description;
-                        let addressnDiv = document.querySelector('.address');
-                        addressnDiv.textContent = data.data.address;
+
+                        let latitude = data.data.lat;
+                        let longitude = data.data.lng;
+                        let addressURL = "https://www.google.com.tw/maps/search/?api=1&query=" + latitude + "," + longitude;
+
+                        let addressLink = document.querySelector('.address');
+                        addressLink.href = addressURL;
+                        addressLink.textContent = data.data.address;
+
                         let transportDiv = document.querySelector('.transportation');
                         transportDiv.textContent = data.data.transport;
 
