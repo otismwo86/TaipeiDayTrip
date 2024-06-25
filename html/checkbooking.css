@@ -406,43 +406,47 @@ body {
         padding-left:10px;
     }
     .info{
-        width:340px;
+        width:90%;
     }
     .nobooking{
-        width:340px;
+        width:90%;
     }
     .nav-links li {
         padding: 0;
     }
     .firstline{
         margin-top: 250px;
-        width:340px;
+        width:90%;
     }
     .line{
-        width:340px;
+        width:90%;
     }
     .contact-info{
-        width:340px;
+        width:90%;
     }
     .creditcard-info{
-        width:340px;
+        width:90%;
     }
     .paymentinfo{
-        width:340px;
+        width:90%;
     }
     .bookinginfo-container{
-        width:340px;   
+        width:90%;   
     }
     .booking-item {
         flex-direction: column;
         align-items: flex-start;
     }
-
+    
     .booking-image {
         width: 100%;
         margin-right: 0;
     }
-
+    .booking-image img {
+        width:100%;
+        height:200px;
+        object-fit: cover;
+    }
     .booking-details {
         width: 100%;
     }
@@ -459,5 +463,4 @@ body {
         height: 30px;
     }
 }
-
 

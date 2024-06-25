@@ -104,6 +104,8 @@
                                 infoContainer.innerHTML = `您好，${data.name}!，待預訂的行程如下：`;
                                 fetchBookingDetails(token);
                                 //調整畫面
+                                document.querySelector('.contact-info-name input').value = data.name;
+                                document.querySelector('.contact-info-email input').value = data.email;
                                 document.querySelector('footer').style.height = "104px";
                                 let elements = document.getElementsByClassName('line');
                                 for (let i = 0; i < elements.length; i++) {
@@ -156,78 +158,71 @@
                             }
                         });
                         if(response.ok){
-                            document.getElementById('nobooking').style.display = "none";
-                            const paymentinfo = document.getElementById('payment');
-                            const bookingdata = await response.json();
-                            let attraid = bookingdata.attrid
-                            let url = `http://18.209.3.48:8000/api/attractions/${attraid}`
-                            fetch(url)
-                            .then(response => response.json())
-                            .then(data => {
-                                let timeRange = '';
-                                    if (bookingdata.time === 'morning') {
-                                        timeRange = '早上 9 點到下午 4 點';
-                                    } else if (bookingdata.time === 'afternoon') {
-                                        timeRange = '下午 4 點至下午 9 點';
-                                    }
-                                paymentinfo.innerHTML = `總價：新台幣 ${bookingdata.price} 元`;
-                                bookinginfoContainer.innerHTML = `
-                                <div class="booking-item">
-                                    <div class="booking-image">
-                                        <img src="${data.data.images[0]}" alt="${bookingdata.name}">
-                                    </div>
-                                    <div class="booking-details">
-                                        <h3>台北一日遊 :${bookingdata.name}</h3>
-                                        <p>日期 : ${bookingdata.date}</p>
-                                        <p>時間 : ${timeRange}</p>
-                                        <p>費用 : 新台幣 ${bookingdata.price} 元</p>
-                                        <p>地址 : ${bookingdata.address}</p>
-                                    </div>
-                                    <div class="booking-action">
-                                        <img src="/week1secondface/picture/trashcan.png" class="delete-booking" data-id="${bookingdata.id}" alt="刪除">
-                                    </div>  
-                                </div>
-                                `;
-                                document.querySelector('.delete-booking').addEventListener('click', async function() {
-                                    const bookingId = this.getAttribute('data-id');
-                                    const token = localStorage.getItem('token');
-                                    try {
-                                        const deleteResponse = await fetch(`http://18.209.3.48:8000/api/booking`, {
-                                            method: 'DELETE',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'Authorization': `Bearer ${token}`
-                                            }
-                                        });
-
-                                        if (deleteResponse.ok) {
-                                            console.log('Booking deleted successfully');                                            
-                                            window.location.reload();
-                                        } else {
-                                            console.error('Failed to delete booking');
-                                        }
-                                    } catch (error) {
-                                        console.error('Error:', error);
+                        document.getElementById('nobooking').style.display = "none";
+                        const paymentinfo = document.getElementById('payment');
+                        const bookingdata = await response.json();
+                        let timeRange = '';
+                        if (bookingdata.data.time === 'morning') {
+                            timeRange = '早上 9 點到下午 4 點';
+                        } else if (bookingdata.data.time === 'afternoon') {
+                            timeRange = '下午 4 點至下午 9 點';
+                        }
+                        paymentinfo.innerHTML = `總價：新台幣 ${bookingdata.data.price} 元`;
+                        bookinginfoContainer.innerHTML = `
+                        <div class="booking-item">
+                            <div class="booking-image">
+                                <img src="${bookingdata.data.attraction.image}" alt="${bookingdata.data.attraction.name}">
+                            </div>
+                            <div class="booking-details">
+                                <h3>台北一日遊 :${bookingdata.data.attraction.name}</h3>
+                                <p>日期 : ${bookingdata.data.date}</p>
+                                <p>時間 : ${timeRange}</p>
+                                <p>費用 : 新台幣 ${bookingdata.data.price} 元</p>
+                                <p>地址 : ${bookingdata.data.attraction.address}</p>
+                            </div>
+                            <div class="booking-action">
+                                <img src="/week1secondface/picture/trashcan.png" class="delete-booking" data-id="${bookingdata.data.attraction.id}" alt="刪除">
+                            </div>  
+                        </div>
+                        `;
+                        document.querySelector('.delete-booking').addEventListener('click', async function() {
+                            const bookingId = this.getAttribute('data-id');
+                            const token = localStorage.getItem('token');
+                            try {
+                                const deleteResponse = await fetch(`http://18.209.3.48:8000/api/booking`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`
                                     }
                                 });
-                            });
-                        } else {
-                            
-                            let element = document.getElementsByClassName('line');
-                            for (let i=0;i<element.length;i++){
-                                element[i].style.display = "none";
+
+                                if (deleteResponse.ok) {
+                                    console.log('Booking deleted successfully');                                            
+                                    window.location.reload();
+                                } else {
+                                    console.error('Failed to delete booking');
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
                             }
-                            document.getElementById('firstline').style.display ="none";
-                            document.getElementById('contact-info').style.display ="none";
-                            document.getElementById('creditcard-info').style.display ="none";
-                            document.querySelector('footer').style.height = "865px";
-                            document.getElementById('paymentinfo').style.display ="none";
-                            document.getElementById('bookinginfo-container').style.display ="none";
+                        });
+                    } else {
+                        let element = document.getElementsByClassName('line');
+                        for (let i=0;i<element.length;i++){
+                            element[i].style.display = "none";
                         }
-                    } catch(error){
-                        console.error('Error:', error);
+                        document.getElementById('firstline').style.display ="none";
+                        document.getElementById('contact-info').style.display ="none";
+                        document.getElementById('creditcard-info').style.display ="none";
+                        document.querySelector('footer').style.height = "865px";
+                        document.getElementById('paymentinfo').style.display ="none";
+                        document.getElementById('bookinginfo-container').style.display ="none";
                     }
+                } catch(error){
+                    console.error('Error:', error);
                 }
+            }
 
             
            
