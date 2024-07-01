@@ -352,7 +352,6 @@ body {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
 }
-
 .main-container{
     display:grid;
     grid-template-columns: 1fr 1fr;
@@ -362,8 +361,9 @@ body {
     align-items: center;
     justify-content: space-between;
     margin: 0 auto;
-    margin-top: 40px;
+    margin-top: 54px;
     padding: 0px;
+    padding-bottom: 20px;
     border-bottom: 1px solid #E8E8E8;
 }
 
@@ -553,6 +553,13 @@ label {
 .booking-button:hover {
     background-color: #336677;
 }
+.booking-button-time{
+    display: none;
+    font-size: 19px;
+    font-weight:500;
+    color:red;
+    padding-left: 10px;
+}
 .description-style{
     display: flex;
     width: 1200px;
@@ -560,7 +567,6 @@ label {
     flex-direction: column; 
     gap: 20px;
     padding: 20px;
-    margin-top: 10px;
 }
 
 .description {

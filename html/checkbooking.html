@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta charset="utf-8"/>
+        <title>台北一日遊</title>
+        <link rel="stylesheet" type="text/css" href="week1secondface/checkbooking.css"/>
+        <link href="week1secondface/picture/icon.ico" rel="shortcut icon"/>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="container">
+                <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
+                <ul class="nav-links">
+                    <li><a href="#">預訂行程</a></li>
+                    <li id="auth-link"><a href="#" id="login">登入/註冊</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="logoutpopup" id="logoutpopup">
+            <div class="logoutheaderline"></div>
+            <div class="logoutpopup-content">
+                <span id="logoutclose-btn" class="logoutclose-btn"><img src="/week1secondface/picture/dialog.png"></span>
+                <div class="logoutheader">要登出嗎?</div>
+                <div class="logoutbutton-container">
+                    <button id="logoutbutton" type="button" class="logoutbutton">確定</button>
+                </div>  
+            </div>
+        </div>
+        <div id="overlay" class="overlay"></div>
+
+        <div class="info">
+            <div id="info-container" class="info-container"></div>
+        </div>
+        
+        <div id="bookinginfo-container" class="bookinginfo-container"></div>
+        
+        <div id="nobooking" class="nobooking">
+            <div id="nobooking-container" class="nobooking-container">目前沒有任何待預訂的行程</div>
+        </div>
+        <div class="firstline" id="firstline"></div>
+
+        <form id="contactform">
+            <div id="contact-info" class="contact-info">
+                <div class="contact-info-header">您的聯絡資訊</div>
+                <div class="contact-info-name"><span>聯絡姓名: </span><input type="text"></div>
+                <div class="contact-info-email"><span>聯絡信箱: <input type="text"></span></div>
+                <div  class="contact-info-number"><span>手機號碼: <input type="text"></span></div>
+                <div class="contact-info-footer">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</div>
+            </div>
+        </form>
+
+        <div class="line"></div>
+        <div id="creditcard-info" class="creditcard-info">
+            <div class="creditcard-info-header">信用卡付款資訊</div>
+            <div class="creditcard-info-number">
+                <label for="cardNumber">卡片號碼：</label>
+                <input type="text" id="cardNumber" name="cardNumber" placeholder="**** **** **** ****" maxlength="19">
+            </div>
+            <div class="creditcard-info-expire">
+                <label for="expiryDate">過期時間：</label>
+                <input type="text" id="expiryDate" name="expiryDate" placeholder="MM / YY" maxlength="5">
+            </div>
+            <div class="creditcard-info-code">
+                <label for="cvv">驗證密碼：</label>
+                <input type="text" id="cvv" name="cvv" placeholder="CVV" maxlength="4">
+            </div>
+        </div>
+        <div class="line"></div>
+        <div class="paymentinfo" id="paymentinfo">
+            <div class="payment" id="payment"></div>
+            <button class="paybutton">確認訂購並付款</button>
+        </div>
+        <footer class="footer">
+            <div class="footer-content">COPYRIGHT © 2021 台北一日遊<div>
+        </footer>
+        <script>
+            // popup表單切換
+                document.addEventListener('DOMContentLoaded', () => {
+                    getCurrentUser(); // 檢查當前用戶資訊
+                });
+
+                // 檢查當前用戶資訊函數
+                async function getCurrentUser() {
+                    const token = localStorage.getItem('token');
+                    const authLink = document.getElementById('auth-link');
+                    const infoContainer = document.getElementById('info-container');
+                    
+                    if (token) {
+                        try {
+                            let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                }
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                // 已登入，顯示登出選項
+                                authLink.innerHTML = '<a href="#" id="logout">登出系統</a>';
+                                infoContainer.innerHTML = `您好，${data.name}!，待預訂的行程如下：`;
+                                fetchBookingDetails(token);
+                                //調整畫面
+                                document.querySelector('.contact-info-name input').value = data.name;
+                                document.querySelector('.contact-info-email input').value = data.email;
+                                document.querySelector('footer').style.height = "104px";
+                                let elements = document.getElementsByClassName('line');
+                                for (let i = 0; i < elements.length; i++) {
+                                    elements[i].style.display = "flex";
+                                }
+                                document.getElementById('contact-info').style.display ="block";
+                                document.getElementById('creditcard-info').style.display ="block";
+                                document.getElementById('logout').addEventListener('click', function() {
+                                    document.getElementById('logoutpopup').style.display = 'block';
+                                    document.getElementById('overlay').style.display = 'block';
+                                });
+                                document.getElementById('logoutbutton').addEventListener('click', function() {
+                                    localStorage.removeItem('token');  
+                                    window.location.reload();  
+                                });
+                                document.getElementById('logoutclose-btn').addEventListener('click', function() {
+                                    document.getElementById('logoutpopup').style.display = 'none';
+                                    document.getElementById('overlay').style.display = 'none';
+                                });
+                            } else {
+                                // Token無效，顯示登入/註冊選項
+                                window.location.href = 'http://18.209.3.48:8000/';
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            window.location.href = 'http://18.209.3.48:8000/';
+                        }
+                    } else {
+                        // 沒有token，顯示登入/註冊選項
+                        window.location.href = 'http://18.209.3.48:8000/';
+                    }
+                }
+
+                
+
+                // overlay
+                document.getElementById('overlay').addEventListener('click', function() {
+                    document.getElementById('overlay').style.display = 'none';
+                    document.getElementById('logoutpopup').style.display = 'none';
+                });
+
+                async function fetchBookingDetails(token){
+                    const bookinginfoContainer = document.getElementById('bookinginfo-container');
+                    try{
+                        let response = await fetch('http://18.209.3.48:8000/api/booking',{
+                            method:"GET",
+                            headers:{
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        if(response.ok){
+                        document.getElementById('nobooking').style.display = "none";
+                        const paymentinfo = document.getElementById('payment');
+                        const bookingdata = await response.json();
+                        let timeRange = '';
+                        if (bookingdata.data.time === 'morning') {
+                            timeRange = '早上 9 點到下午 4 點';
+                        } else if (bookingdata.data.time === 'afternoon') {
+                            timeRange = '下午 4 點至下午 9 點';
+                        }
+                        paymentinfo.innerHTML = `總價：新台幣 ${bookingdata.data.price} 元`;
+                        bookinginfoContainer.innerHTML = `
+                        <div class="booking-item">
+                            <div class="booking-image">
+                                <img src="${bookingdata.data.attraction.image}" alt="${bookingdata.data.attraction.name}">
+                            </div>
+                            <div class="booking-details">
+                                <h3>台北一日遊 :${bookingdata.data.attraction.name}</h3>
+                                <p>日期 : ${bookingdata.data.date}</p>
+                                <p>時間 : ${timeRange}</p>
+                                <p>費用 : 新台幣 ${bookingdata.data.price} 元</p>
+                                <p>地址 : ${bookingdata.data.attraction.address}</p>
+                            </div>
+                            <div class="booking-action">
+                                <img src="/week1secondface/picture/trashcan.png" class="delete-booking" data-id="${bookingdata.data.attraction.id}" alt="刪除">
+                            </div>  
+                        </div>
+                        `;
+                        document.querySelector('.delete-booking').addEventListener('click', async function() {
+                            const bookingId = this.getAttribute('data-id');
+                            const token = localStorage.getItem('token');
+                            try {
+                                const deleteResponse = await fetch(`http://18.209.3.48:8000/api/booking`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`
+                                    }
+                                });
+
+                                if (deleteResponse.ok) {
+                                    console.log('Booking deleted successfully');                                            
+                                    window.location.reload();
+                                } else {
+                                    console.error('Failed to delete booking');
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                            }
+                        });
+                    } else {
+                        let element = document.getElementsByClassName('line');
+                        for (let i=0;i<element.length;i++){
+                            element[i].style.display = "none";
+                        }
+                        document.getElementById('firstline').style.display ="none";
+                        document.getElementById('contact-info').style.display ="none";
+                        document.getElementById('creditcard-info').style.display ="none";
+                        document.querySelector('footer').style.height = "865px";
+                        document.getElementById('paymentinfo').style.display ="none";
+                        document.getElementById('bookinginfo-container').style.display ="none";
+                    }
+                } catch(error){
+                    console.error('Error:', error);
+                }
+            }
+
+            
+           
+           
+        </script>
+            
+
+    </body>
+
+</html>
