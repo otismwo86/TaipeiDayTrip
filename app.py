@@ -14,17 +14,11 @@ from starlette.middleware.sessions import SessionMiddleware
 import jwt
 import datetime as dt
 import httpx
-from fastapi.middleware.cors import CORSMiddleware
+
 
 app=FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost", "http://ec2-18-209-3-48.compute-1.amazonaws.com"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 SECRET_KEY = "yeahyeah" 
