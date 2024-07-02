@@ -408,9 +408,26 @@
                         },
                         body: JSON.stringify({ prime, order }),
                     });
-
+                    const token = localStorage.getItem('token');
                     const data = await response.json();
                     if (response.ok && data.status === "PAID") {
+                        try {
+                                const deletebooking = await fetch(`http://18.209.3.48:8000/api/booking`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`
+                                    }
+                                });
+
+                                if (deletebooking.ok) {
+                                    console.log('Booking deleted successfully');                                            
+                                } else {
+                                    console.error('Failed to delete booking');
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                            }
                         window.location.href = '/thankyou?number=' + data.order_number;
                     } else {
                         window.location.href = '/thankyou?number=' + data.order_number;
