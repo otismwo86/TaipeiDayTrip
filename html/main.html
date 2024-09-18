@@ -11,7 +11,7 @@
     <body>
         <nav class="navbar">
             <div class="container">
-                <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
+                <a href="/" class="logo">台北一日遊</a>
                 <ul class="nav-links">
                     <li id="booking-link"><a href="#">預訂行程</a></li>
                     <li id="auth-link"><a href="#" id="login">登入/註冊</a></li>
@@ -110,7 +110,7 @@
                     const bookinglink = document.getElementById('booking-link').querySelector('a');
                     if (token) {
                         try {
-                            let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
+                            let response = await fetch('/api/user/auth', {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -122,7 +122,7 @@
                                 const data = await response.json();
                                 // 已登入，顯示登出選項
                                 authLink.innerHTML = '<a href="#" id="logout">登出系統</a>';
-                                bookinglink.href = 'http://18.209.3.48:8000/booking';
+                                bookinglink.href = '/booking';
                                 document.getElementById('logout').addEventListener('click', function() {
                                     document.getElementById('logoutpopup').style.display = 'block';
                                     document.getElementById('overlay').style.display = 'block';
@@ -201,7 +201,7 @@
                 const loginmessageContainer = document.getElementById('loginMessageContainer');
                 loginmessageContainer.innerHTML = ''; // 清空之前的訊息
                 try {
-                    let response = await fetch('http://18.209.3.48:8000/api/user/auth',{
+                    let response = await fetch('/api/user/auth',{
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
@@ -236,7 +236,7 @@
                     messageContainer.innerHTML = ''; // 清空之前的訊息
 
                     try {
-                        let response = await fetch('http://18.209.3.48:8000/api/user', {
+                        let response = await fetch('/api/user', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -265,7 +265,7 @@
             });
 
             //捷運幻燈片
-            let mrturl = "http://18.209.3.48:8000/api/mrts";
+            let mrturl = "/api/mrts";
         fetch(mrturl)
             .then(response => response.json())
             .then(data => {
@@ -291,7 +291,7 @@
 
             let nextpage = 0;
             let currentSearchValue = "";
-            let baseUrl = "http://18.209.3.48:8000/api/attractions";
+            let baseUrl = "/api/attractions";
 
             function fetchandcreate(n){
                 let apiURL = `${baseUrl}?page=${n}`;
@@ -315,7 +315,7 @@
 
                             let id = attraction.id;
                             cardWrapper.addEventListener('click', () => {
-                                window.location.href = `http://18.209.3.48:8000/attraction/${id}`;
+                                window.location.href = `/attraction/${id}`;
                             });
 
                             let name = document.createElement("div");
@@ -378,7 +378,7 @@
 
                         let id = attraction.id;
                         cardWrapper.addEventListener('click', () => {
-                        window.location.href = `http://18.209.3.48:8000/attraction/${id}`;
+                        window.location.href = `/attraction/${id}`;
                         });
                         
                         let infoContainer = document.createElement("div");

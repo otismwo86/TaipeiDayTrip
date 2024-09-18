@@ -12,7 +12,7 @@
     <div class="wrapper">
         <nav class="navbar">
             <div class="container">
-                <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
+                <a href="/" class="logo">台北一日遊</a>
                 <ul class="nav-links">
                     <li id="booking-link"><a href="#">預訂行程</a></li>
                     <li id="auth-link"><a href="#" id="login">登入/註冊</a></li>
@@ -127,7 +127,7 @@
 
                     if (token) {
                         try {
-                            let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
+                            let response = await fetch('/api/user/auth', {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -139,7 +139,7 @@
                                 const data = await response.json();
                                 // 已登入，顯示登出選項
                                 authLink.innerHTML = '<a href="#" id="logout">登出系統</a>';
-                                bookinglink.href = 'http://18.209.3.48:8000/booking';
+                                bookinglink.href = '/booking';
                                 document.getElementById('logout').addEventListener('click', function() {
                                     document.getElementById('logoutpopup').style.display = 'block';
                                     document.getElementById('overlay').style.display = 'block';
@@ -222,7 +222,7 @@
                 const loginmessageContainer = document.getElementById('loginMessageContainer');
                 loginmessageContainer.innerHTML = ''; // 清空之前的訊息
                 try {
-                    let response = await fetch('http://18.209.3.48:8000/api/user/auth',{
+                    let response = await fetch('/api/user/auth',{
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
@@ -257,7 +257,7 @@
                     messageContainer.innerHTML = ''; // 清空之前的訊息
 
                     try {
-                        let response = await fetch('http://18.209.3.48:8000/api/user', {
+                        let response = await fetch('/api/user', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -291,7 +291,7 @@
                 const url = window.location.href;
                 const id = url.split('/').pop();
 
-                const apiUrl = `http://18.209.3.48:8000/api/attractions/${id}`;
+                const apiUrl = `/api/attractions/${id}`;
 
                 fetch(apiUrl)
                     .then(response => response.json())
@@ -430,7 +430,7 @@
                 price = 2500;
             }
             try {
-                let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
+                let response = await fetch('/api/user/auth', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -445,7 +445,7 @@
                     if (!morning && !afternoon) {
                         message.style.display = "inline";
                     } else {
-                        let bookingresponse = await fetch('http://18.209.3.48:8000/api/booking', {
+                        let bookingresponse = await fetch('/api/booking', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -460,7 +460,7 @@
                         });
 
                         if (bookingresponse.ok) {
-                            window.location.href = 'http://18.209.3.48:8000/booking';
+                            window.location.href = '/booking';
                         } else {
                             // 處理預訂失敗的情況
                             console.error('Booking failed');

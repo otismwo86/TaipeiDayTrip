@@ -11,7 +11,7 @@
     <body>
         <nav class="navbar">
             <div class="container">
-                <a href="http://18.209.3.48:8000/" class="logo">台北一日遊</a>
+                <a href="/" class="logo">台北一日遊</a>
                 <ul class="nav-links">
                     <li><a href="#">預訂行程</a></li>
                     <li id="auth-link"><a href="#" id="login">登入/註冊</a></li>
@@ -222,7 +222,7 @@
                     
                     if (token) {
                         try {
-                            let response = await fetch('http://18.209.3.48:8000/api/user/auth', {
+                            let response = await fetch('/api/user/auth', {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -261,15 +261,15 @@
                                 });
                             } else {
                                 // Token無效，顯示登入/註冊選項
-                                window.location.href = 'http://18.209.3.48:8000/';
+                                window.location.href = '/';
                             }
                         } catch (error) {
                             console.error('Error:', error);
-                            window.location.href = 'http://18.209.3.48:8000/';
+                            window.location.href = '/';
                         }
                     } else {
                         // 沒有token，顯示登入/註冊選項
-                        window.location.href = 'http://18.209.3.48:8000/';
+                        window.location.href = '/';
                     }
                 }
 
@@ -284,7 +284,7 @@
                 async function fetchBookingDetails(token){
                 const bookinginfoContainer = document.getElementById('bookinginfo-container');
                 try{
-                    let response = await fetch('http://18.209.3.48:8000/api/booking',{
+                    let response = await fetch('/api/booking',{
                         method:"GET",
                         headers:{
                             'Content-Type': 'application/json',
@@ -325,7 +325,7 @@
                             const bookingId = this.getAttribute('data-id');
                             const token = localStorage.getItem('token');
                             try {
-                                const deleteResponse = await fetch(`http://18.209.3.48:8000/api/booking`, {
+                                const deleteResponse = await fetch(`/api/booking`, {
                                     method: 'DELETE',
                                     headers: {
                                         'Content-Type': 'application/json',
@@ -401,7 +401,7 @@
                     }
                 };
                 try {
-                    const response = await fetch('http://18.209.3.48:8000/api/orders', {
+                    const response = await fetch('/api/orders', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -412,7 +412,7 @@
                     const data = await response.json();
                     if (response.ok && data.status === "PAID") {
                         try {
-                                const deletebooking = await fetch(`http://18.209.3.48:8000/api/booking`, {
+                                const deletebooking = await fetch(`/api/booking`, {
                                     method: 'DELETE',
                                     headers: {
                                         'Content-Type': 'application/json',
