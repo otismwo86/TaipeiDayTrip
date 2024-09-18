@@ -36,6 +36,7 @@ def create_jwt_token(user_id: int, name: str, email: str):
 def decode_jwt_token(token:str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -65,6 +66,7 @@ def validate_user(email,password):
      if result:
           return {"id": result[0], "name": result[1], "email": result[2]}
      return None
+
 def serialize_data(data):
     for key, value in data.items():
         if isinstance(value, decimal.Decimal):
